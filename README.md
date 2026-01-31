@@ -14,3 +14,15 @@ Was es können soll:
    - Import/Export der Kontaktliste (z. B. als CSV)
 
 TODO weiter Infos zum Projekt
+
+Befehle:
+
+mvn clean install
+mvn clean test
+mvn clean package
+mvn clean compile
+# mvn exec:java "-Dexec.mainClass=de.adressbuch.Main"
+mvn surefire-report:report
+mvn clean verify
+
+mvn exec:java
