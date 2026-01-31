@@ -13,16 +13,20 @@ Was es können soll:
    - Kontakte nach Gruppen filtern
    - Import/Export der Kontaktliste (z. B. als CSV)
 
-TODO weiter Infos zum Projekt
+# Requirements:
+Java Version 17+
+Maven Latest Version
 
-Befehle:
+# Initial Setup:
+mvn clean install - Installiere alle dependencies für unser Projekt
 
-mvn clean install
-mvn clean test
-mvn clean package
-mvn clean compile
-# mvn exec:java "-Dexec.mainClass=de.adressbuch.Main"
-mvn surefire-report:report
-mvn clean verify
+# Fresh resetup:
+mvn clean compile - vor dem install nochmal um neu zu kompilieren und alte Artifakte zu löschen
 
-mvn exec:java
+# Testing
+mvn clean test - starte die Tests nach einem Cleanup
+
+mvn surefire-report:report - Surefire report + Testing
+
+# Execute Program/Project (via Exec)
+mvn exec java
