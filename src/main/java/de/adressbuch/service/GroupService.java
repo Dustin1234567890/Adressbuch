@@ -2,6 +2,7 @@ package de.adressbuch.service;
 
 import de.adressbuch.models.Group;
 import de.adressbuch.repository.interfaces.GroupRepo;
+import de.adressbuch.util.Utils;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class GroupService {
         validateGroupName(name);
         Group group = Group.create(
             name, 
-            Optional.ofNullable(description).filter(s -> !s.isBlank())
+            Utils.convertToOptionalNonBlank(description)
         );
         return groupRepository.save(group);
     }
@@ -29,7 +30,7 @@ public class GroupService {
         Group updated = Group.of(
             id,
             name,
-            Optional.ofNullable(description).filter(s -> !s.isBlank())
+            Utils.convertToOptionalNonBlank(description)
         );
         return groupRepository.update(updated);
     }

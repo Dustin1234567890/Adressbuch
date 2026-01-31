@@ -2,6 +2,7 @@ package de.adressbuch.cli;
 
 import de.adressbuch.models.Contact;
 import de.adressbuch.models.Group;
+import de.adressbuch.config.DatabaseConfig;
 import de.adressbuch.repository.*;
 import de.adressbuch.repository.interfaces.*;
 import de.adressbuch.service.*;
@@ -24,16 +25,14 @@ import java.util.concurrent.Callable;
     }
 )
 public class AdressbuchCLI implements Callable<Integer> {
-    private static final String DB_URL = "jdbc:sqlite:adressbuch.db";
-
     private static ContactService contactService;
     private static GroupService groupService;
     private static UserService userService;
 
     static {
-        contactService = new ContactService(new SQLiteContactRepo(DB_URL));
-        groupService = new GroupService(new SQLiteGroupRepo(DB_URL));
-        userService = new UserService(new SQLiteUserRepo(DB_URL));
+        contactService = new ContactService(new SQLiteContactRepo(DatabaseConfig.DB_URL));
+        groupService = new GroupService(new SQLiteGroupRepo(DatabaseConfig.DB_URL));
+        userService = new UserService(new SQLiteUserRepo(DatabaseConfig.DB_URL));
     }
 
     @Override

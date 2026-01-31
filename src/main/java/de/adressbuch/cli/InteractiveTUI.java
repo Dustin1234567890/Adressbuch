@@ -1,5 +1,6 @@
 package de.adressbuch.cli;
 
+import de.adressbuch.config.DatabaseConfig;
 import de.adressbuch.repository.*;
 import de.adressbuch.repository.interfaces.*;
 import de.adressbuch.service.*;
@@ -7,15 +8,13 @@ import de.adressbuch.service.*;
 import java.util.Scanner;
 
 public class InteractiveTUI {
-    private static final String DB_URL = "jdbc:sqlite:adressbuch.db";
-
     private final ContactService contactService;
     private final GroupService groupService;
     private boolean running = true;
 
     public InteractiveTUI() {
-        this.contactService = new ContactService(new SQLiteContactRepo(DB_URL));
-        this.groupService = new GroupService(new SQLiteGroupRepo(DB_URL));
+        this.contactService = new ContactService(new SQLiteContactRepo(DatabaseConfig.DB_URL));
+        this.groupService = new GroupService(new SQLiteGroupRepo(DatabaseConfig.DB_URL));
     }
 
     public void start() {

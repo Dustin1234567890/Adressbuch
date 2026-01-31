@@ -2,6 +2,7 @@ package de.adressbuch.service;
 
 import de.adressbuch.models.Contact;
 import de.adressbuch.repository.interfaces.ContactRepo;
+import de.adressbuch.util.Utils;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,9 +18,9 @@ public class ContactService {
         validateContactName(name);
         Contact contact = Contact.create(
             name,
-            Optional.ofNullable(phoneNumber).filter(s -> !s.isBlank()),
-            Optional.ofNullable(address).filter(s -> !s.isBlank()),
-            Optional.ofNullable(email).filter(s -> !s.isBlank())
+            Utils.convertToOptionalNonBlank(phoneNumber),
+            Utils.convertToOptionalNonBlank(address),
+            Utils.convertToOptionalNonBlank(email)
         );
         return contactRepository.save(contact);
     }
@@ -31,9 +32,9 @@ public class ContactService {
         Contact updated = Contact.of(
             id,
             name,
-            Optional.ofNullable(phoneNumber).filter(s -> !s.isBlank()),
-            Optional.ofNullable(address).filter(s -> !s.isBlank()),
-            Optional.ofNullable(email).filter(s -> !s.isBlank())
+            Utils.convertToOptionalNonBlank(phoneNumber),
+            Utils.convertToOptionalNonBlank(address),
+            Utils.convertToOptionalNonBlank(email)
         );
         return contactRepository.update(updated);
     }

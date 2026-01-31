@@ -1,6 +1,7 @@
 package de.adressbuch.repository;
 
 import de.adressbuch.models.Group;
+import de.adressbuch.util.Utils;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,7 +96,7 @@ public class SQLiteGroupRepo implements GroupRepo {
             Group group = Group.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("description", String.class)).filter(s -> !s.isBlank())
+                Utils.convertToOptionalNonBlank(ret.get("description", String.class))
             );
 
             create.deleteFrom(table(TABLE_NAME))
@@ -125,7 +126,7 @@ public class SQLiteGroupRepo implements GroupRepo {
             Group group = Group.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("description", String.class)).filter(s -> !s.isBlank())
+                Utils.convertToOptionalNonBlank(ret.get("description", String.class))
             );
 
             return Optional.of(group);
@@ -151,7 +152,7 @@ public class SQLiteGroupRepo implements GroupRepo {
             Group group = Group.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("description", String.class)).filter(s -> !s.isBlank())
+                Utils.convertToOptionalNonBlank(ret.get("description", String.class))
             );
 
             return Optional.of(group);
@@ -170,7 +171,7 @@ public class SQLiteGroupRepo implements GroupRepo {
                 .fetch(record -> Group.of(
                     record.get("id", Long.class),
                     record.get("name", String.class),
-                    Optional.ofNullable(record.get("description", String.class)).filter(s -> !s.isBlank())
+                    Utils.convertToOptionalNonBlank(record.get("description", String.class))
                 ));
         } catch (SQLException e) {
             throw new RuntimeException("error finding list of all groups", e);
