@@ -95,7 +95,7 @@ public class SQLiteGroupRepo implements GroupRepo {
             Group group = Group.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("description", String.class))
+                Optional.ofNullable(ret.get("description", String.class)).filter(s -> !s.isBlank())
             );
 
             create.deleteFrom(table(TABLE_NAME))
@@ -125,7 +125,7 @@ public class SQLiteGroupRepo implements GroupRepo {
             Group group = Group.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("description", String.class))
+                Optional.ofNullable(ret.get("description", String.class)).filter(s -> !s.isBlank())
             );
 
             return Optional.of(group);
@@ -151,7 +151,7 @@ public class SQLiteGroupRepo implements GroupRepo {
             Group group = Group.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("description", String.class))
+                Optional.ofNullable(ret.get("description", String.class)).filter(s -> !s.isBlank())
             );
 
             return Optional.of(group);
@@ -170,7 +170,7 @@ public class SQLiteGroupRepo implements GroupRepo {
                 .fetch(record -> Group.of(
                     record.get("id", Long.class),
                     record.get("name", String.class),
-                    Optional.ofNullable(record.get("description", String.class))
+                    Optional.ofNullable(record.get("description", String.class)).filter(s -> !s.isBlank())
                 ));
         } catch (SQLException e) {
             throw new RuntimeException("error finding list of all groups", e);

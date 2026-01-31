@@ -17,7 +17,7 @@ public class GroupService {
         validateGroupName(name);
         Group group = Group.create(
             name, 
-            Optional.ofNullable(description)
+            Optional.ofNullable(description).filter(s -> !s.isBlank())
         );
         return groupRepository.save(group);
     }
@@ -29,7 +29,7 @@ public class GroupService {
         Group updated = Group.of(
             id,
             name,
-            Optional.ofNullable(description)
+            Optional.ofNullable(description).filter(s -> !s.isBlank())
         );
         return groupRepository.update(updated);
     }

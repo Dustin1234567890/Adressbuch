@@ -17,9 +17,9 @@ public class ContactService {
         validateContactName(name);
         Contact contact = Contact.create(
             name,
-            Optional.ofNullable(phoneNumber),
-            Optional.ofNullable(address),
-            Optional.ofNullable(email)
+            Optional.ofNullable(phoneNumber).filter(s -> !s.isBlank()),
+            Optional.ofNullable(address).filter(s -> !s.isBlank()),
+            Optional.ofNullable(email).filter(s -> !s.isBlank())
         );
         return contactRepository.save(contact);
     }
@@ -31,9 +31,9 @@ public class ContactService {
         Contact updated = Contact.of(
             id,
             name,
-            Optional.ofNullable(phoneNumber),
-            Optional.ofNullable(address),
-            Optional.ofNullable(email)
+            Optional.ofNullable(phoneNumber).filter(s -> !s.isBlank()),
+            Optional.ofNullable(address).filter(s -> !s.isBlank()),
+            Optional.ofNullable(email).filter(s -> !s.isBlank())
         );
         return contactRepository.update(updated);
     }

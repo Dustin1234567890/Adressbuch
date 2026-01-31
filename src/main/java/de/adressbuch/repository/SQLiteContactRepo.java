@@ -98,9 +98,9 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
             Contact contact = Contact.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("phone", String.class)),
-                Optional.ofNullable(ret.get("address", String.class)),
-                Optional.ofNullable(ret.get("email", String.class))
+                Optional.ofNullable(ret.get("phone", String.class)).filter(s -> !s.isBlank()),
+                Optional.ofNullable(ret.get("address", String.class)).filter(s -> !s.isBlank()),
+                Optional.ofNullable(ret.get("email", String.class)).filter(s -> !s.isBlank())
             );
 
             create.deleteFrom(table(TABLE_NAME))
@@ -130,9 +130,9 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
             Contact contact = Contact.of(
                 ret.get("id", Long.class),
                 ret.get("name", String.class),
-                Optional.ofNullable(ret.get("phone", String.class)),
-                Optional.ofNullable(ret.get("address", String.class)),
-                Optional.ofNullable(ret.get("email", String.class))
+                Optional.ofNullable(ret.get("phone", String.class)).filter(s -> !s.isBlank()),
+                Optional.ofNullable(ret.get("address", String.class)).filter(s -> !s.isBlank()),
+                Optional.ofNullable(ret.get("email", String.class)).filter(s -> !s.isBlank())
             );
 
             return Optional.of(contact);
@@ -151,9 +151,9 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                 .fetch(record -> Contact.of(
                     record.get("id", Long.class),
                     record.get("name", String.class),
-                    Optional.ofNullable(record.get("phone", String.class)),
-                    Optional.ofNullable(record.get("address", String.class)),
-                    Optional.ofNullable(record.get("email", String.class))
+                    Optional.ofNullable(record.get("phone", String.class)).filter(s -> !s.isBlank()),
+                    Optional.ofNullable(record.get("address", String.class)).filter(s -> !s.isBlank()),
+                    Optional.ofNullable(record.get("email", String.class)).filter(s -> !s.isBlank())
                 ));
         } catch (SQLException e) {
             throw new RuntimeException("error finding list of all contacts", e);
