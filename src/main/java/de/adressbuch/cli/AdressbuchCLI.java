@@ -1,18 +1,20 @@
 package de.adressbuch.cli;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import de.adressbuch.config.DatabaseConfig;
 import de.adressbuch.models.Contact;
 import de.adressbuch.models.Group;
-import de.adressbuch.config.DatabaseConfig;
-import de.adressbuch.repository.*;
-import de.adressbuch.repository.interfaces.*;
-import de.adressbuch.service.*;
-import picocli.CommandLine;
+import de.adressbuch.repository.SQLiteContactRepo;
+import de.adressbuch.repository.SQLiteGroupRepo;
+import de.adressbuch.repository.SQLiteUserRepo;
+import de.adressbuch.service.ContactService;
+import de.adressbuch.service.GroupService;
+import de.adressbuch.service.UserService;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
-import java.util.List;
-import java.util.concurrent.Callable;
 
 @Command(
     name = "adressbuch",
@@ -74,7 +76,7 @@ public class AdressbuchCLI implements Callable<Integer> {
         @Override
         public Integer call() {
             contactService.addContact(name, phone, address, email);
-            System.out.println("Kontakt hinzugefügt");
+            System.out.println("Kontakt " + name + " wurde erfolgreich angelegt.");
             return 0;
         }
     }
@@ -85,12 +87,29 @@ public class AdressbuchCLI implements Callable<Integer> {
         public Integer call() {
             List<Contact> contacts = contactService.findAllContacts();
             if (contacts.isEmpty()) {
-                System.out.println("Keine Kontakte vorhanden");
+                System.out.println(
+                    "Keine Kontakte vorhanden.\n" +
+                    "Beispiel zum Hinzufügen eines Kontakts:\n" +
+                    "add --name <Name> --phone <Telefonnummer> --address <Adresse> --email <E-Mail>"
+                );
                 return 0;
             }
+            
+            System.out.printf(
+                    "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+                    "ID", "Name", "Telefon", "E-Mail", "Adresse"
+            );
+            System.out.println("---------------------------------------------------------------------------------------------");
+
             for (Contact c : contacts) {
-                System.out.println(c.getId().orElse(-1L) + " | " + c.getName() + " | " +
-                        c.getPhoneNumber().orElse("-") + " | " + c.getEmail().orElse("-"));
+                System.out.printf(
+                        "%-5d | %-20s | %-15s | %-25s | %-30s%n",
+                        c.getId().orElse(-1L),
+                        c.getName(),
+                        c.getPhoneNumber().orElse("-"),
+                        c.getEmail().orElse("-"),
+                        c.getAddress().orElse("-")
+                );
             }
             return 0;
         }
@@ -103,11 +122,9 @@ public class AdressbuchCLI implements Callable<Integer> {
 
         @Override
         public Integer call() {
-            List<Contact> results = contactService.findAllContacts().stream()
-                    .filter(c -> c.getName().toLowerCase().contains(searchTerm.toLowerCase()))
-                    .toList();
+            List<Contact> results = contactService.searchContactsByName(searchTerm);
             if (results.isEmpty()) {
-                System.out.println("Keine Ergebnisse gefunden");
+                System.out.println("Kein Kontakt mit dem Suchbegriff " + searchTerm + " gefunden.");;
                 return 0;
             }
             for (Contact c : results) {
@@ -137,7 +154,13 @@ public class AdressbuchCLI implements Callable<Integer> {
         @Override
         public Integer call() {
             contactService.updateContact(id, name, phone, address, email);
-            System.out.println("Kontakt aktualisiert");
+            System.out.println(
+                "Kontakt erfolgreich aktualisiert.\n" +
+                (name != null ? "Name: " + name + "\n" : "") +
+                (phone != null ? "Telefon: " + phone + "\n" : "") +
+                (email != null ? "E-Mail: " + email + "\n" : "") +
+                (address != null ? "Adresse: " + address + "\n" : "")
+            );
             return 0;
         }
     }
@@ -149,8 +172,12 @@ public class AdressbuchCLI implements Callable<Integer> {
 
         @Override
         public Integer call() {
-            contactService.deleteContact(id);
-            System.out.println("Kontakt gelöscht");
+            boolean deleted = contactService.deleteContact(id);
+            if (deleted) {
+                System.out.println("Kontakt mit ID " + id + " wurde erfolgreich gelöscht.");
+            } else {
+                System.out.println("Kein Kontakt mit ID " + id + " gefunden.");
+            }
             return 0;
         }
     }
@@ -180,7 +207,11 @@ public class AdressbuchCLI implements Callable<Integer> {
         @Override
         public Integer call() {
             groupService.addGroup(name, description);
-            System.out.println("Gruppe hinzugefügt");
+            System.out.println(
+                "Gruppe erfolgreich angelegt:\n" +
+                "Name: " + name + "\n" +
+                "Beschreibung: " + (description.isBlank() ? "-" : description)
+            );
             return 0;
         }
     }
@@ -191,11 +222,24 @@ public class AdressbuchCLI implements Callable<Integer> {
         public Integer call() {
             List<Group> groups = groupService.findAllGroups();
             if (groups.isEmpty()) {
-                System.out.println("Keine Gruppen vorhanden");
+                System.out.println(
+                    "Keine Gruppen vorhanden.\n" +
+                    "Du kannst eine neue Gruppe hinzufügen mit:\n" +
+                    "add --name <Gruppenname> --description <Beschreibung>"
+                );
                 return 0;
             }
+
+            System.out.printf("%-5s | %-20s | %-40s%n", "ID", "Name", "Beschreibung");
+            System.out.println("---------------------------------------------------------------------");
+
             for (Group g : groups) {
-                System.out.println(g.getId().orElse(-1L) + " | " + g.getName());
+                System.out.printf(
+                    "%-5d | %-20s | %-40s%n",
+                    g.getId().orElse(-1L),
+                    g.getName(),
+                    g.getDescription().orElse("-")
+                );
             }
             return 0;
         }
@@ -208,8 +252,12 @@ public class AdressbuchCLI implements Callable<Integer> {
 
         @Override
         public Integer call() {
-            groupService.deleteGroup(id);
-            System.out.println("Gruppe gelöscht");
+            boolean deleted = groupService.deleteGroup(id);
+            if (deleted) {
+                System.out.println("Gruppe mit ID " + id + " wurde erfolgreich gelöscht.");
+            } else {
+                System.out.println("Keine Gruppe mit ID " + id + " gefunden.");
+            }
             return 0;
         }
     }

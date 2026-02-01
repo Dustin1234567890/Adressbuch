@@ -2,6 +2,7 @@ package de.adressbuch.repository;
 
 import de.adressbuch.models.Contact;
 import de.adressbuch.util.Utils;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import java.sql.DriverManager;
 import static org.jooq.impl.DSL.*;
 import org.jooq.SQLDialect;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 
 public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.ContactRepo {
     private final String dbUrl;
@@ -158,6 +160,28 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                 ));
         } catch (SQLException e) {
             throw new RuntimeException("error finding list of all contacts", e);
+        }
+    }
+
+    @Override
+    public List<Contact> searchByName(String searchTerm) {
+        String likePattern = "%" + searchTerm.toLowerCase() + "%";
+
+        try (Connection c = getConnection()) {
+            DSLContext create = using(c, SQLDialect.SQLITE);
+
+            return create.select()
+                    .from(table(TABLE_NAME))
+                    .where(DSL.lower(field("name", String.class)).like(likePattern))
+                    .fetch(record -> Contact.of(
+                            record.get("id", Long.class),
+                            record.get("name", String.class),
+                            Utils.convertToOptionalNonBlank(record.get("phone", String.class)),
+                            Utils.convertToOptionalNonBlank(record.get("address", String.class)),
+                            Utils.convertToOptionalNonBlank(record.get("email", String.class))
+                    ));
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + searchTerm, e);
         }
     }
 }

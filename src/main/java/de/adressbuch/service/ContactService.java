@@ -1,11 +1,11 @@
 package de.adressbuch.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import de.adressbuch.models.Contact;
 import de.adressbuch.repository.interfaces.ContactRepo;
 import de.adressbuch.util.Utils;
-
-import java.util.List;
-import java.util.Optional;
 
 public class ContactService {
     private final ContactRepo contactRepository;
@@ -53,6 +53,10 @@ public class ContactService {
 
     public List<Contact> findAllContacts() {
         return contactRepository.findAll();
+    }
+
+    public List<Contact> searchContactsByName(String searchTerm) {
+        return contactRepository.searchByName(searchTerm);
     }
 
     public void validateContactName(String name) {

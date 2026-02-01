@@ -29,4 +29,4 @@ mvn clean test - starte die Tests nach einem Cleanup
 mvn surefire-report:report - Surefire report + Testing
 
 # Execute Program/Project (via Exec)
-mvn exec java
+mvn exec:java
