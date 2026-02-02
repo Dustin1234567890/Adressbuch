@@ -124,11 +124,24 @@ public class AdressbuchCLI implements Callable<Integer> {
         public Integer call() {
             List<Contact> results = contactService.searchContactsByName(searchTerm);
             if (results.isEmpty()) {
-                System.out.println("Kein Kontakt mit dem Suchbegriff " + searchTerm + " gefunden.");;
+                System.out.println("Kein Kontakt mit dem Suchbegriff " + searchTerm + " gefunden.");
                 return 0;
             }
+            System.out.printf(
+                "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+                "ID", "Name", "Telefon", "E-Mail", "Adresse"
+            );
+            System.out.println("---------------------------------------------------------------------------------------------");
+
             for (Contact c : results) {
-                System.out.println(c.getId().orElse(-1L) + " | " + c.getName());
+                System.out.printf(
+                        "%-5d | %-20s | %-15s | %-25s | %-30s%n",
+                        c.getId().orElse(-1L),
+                        c.getName(),
+                        c.getPhoneNumber().orElse("-"),
+                        c.getEmail().orElse("-"),
+                        c.getAddress().orElse("-")
+                );
             }
             return 0;
         }
