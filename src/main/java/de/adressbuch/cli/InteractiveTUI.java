@@ -161,6 +161,7 @@ public class InteractiveTUI {
 
     private void deleteContact() {
         Long id;
+        String response;
 
         System.out.println();
         System.out.println("=== Kontakt löschen ===");
@@ -168,11 +169,18 @@ public class InteractiveTUI {
         System.out.println("Bitte geben Sie die Kontakt-ID ein: ");
         id = Long.valueOf(scanner.nextLine().trim());
 
-        boolean deleted = contactService.deleteContact(id);
-        if (deleted) {
-            System.out.println("Kontakt mit ID " + id + " wurde erfolgreich gelöscht.");
+        System.out.println("Möchten Sie wirklich den Kontakt von Ihrem Addressbuch löschen? Geben Sie \"Ja\" zum bestätigen ein.");
+        response = scanner.nextLine().trim().toLowerCase();
+
+        if ("ja".equals(response)) {
+            boolean deleted = contactService.deleteContact(id);
+            if (deleted) {
+                System.out.println("Kontakt mit ID " + id + " wurde erfolgreich gelöscht.");
+            } else {
+                System.out.println("Keinen Kontakt mit ID " + id + " gefunden.");
+            }
         } else {
-            System.out.println("Keinen Kontakt mit ID " + id + " gefunden.");
+            System.out.println("Der Löschvorgang wurde abgebrochen.");
         }
     }
 
@@ -246,6 +254,7 @@ public class InteractiveTUI {
 
     private void deleteGroup() {
         Long id;
+        String response;
 
         System.out.println();
         System.out.println("=== Gruppe löschen ===");
@@ -253,11 +262,18 @@ public class InteractiveTUI {
         System.out.println("Bitte geben Sie die Gruppen-ID ein: ");
         id = Long.valueOf(scanner.nextLine().trim());
 
-        boolean deleted = groupService.deleteGroup(id);
-        if (deleted) {
-            System.out.println("Gruppe mit ID " + id + " wurde erfolgreich gelöscht.");
-        } else {
-            System.out.println("Keine Gruppe mit ID " + id + " gefunden.");
+        System.out.println("Möchten Sie wirklich die Gruppe von Ihrem Addressbuch löschen? Geben Sie \"Ja\" zum bestätigen ein.");
+        response = scanner.nextLine().trim().toLowerCase();
+
+        if ("ja".equals(response)) {
+            boolean deleted = groupService.deleteGroup(id);
+            if (deleted) {
+                System.out.println("Gruppe mit ID " + id + " wurde erfolgreich gelöscht.");
+            } else {
+                System.out.println("Keine Gruppe mit ID " + id + " gefunden.");
+            } 
+        }else {
+            System.out.println("Der Löschvorgang wurde abgebrochen.");
         }
     }
 }
