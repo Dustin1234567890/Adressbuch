@@ -25,12 +25,12 @@ public class ContactFilterServiceTest {
 
     @Test
     public void testFindContactsByGroupId() {
-        Long groupId = 1L;
-        List<Long> contactIds = Arrays.asList(1L, 2L, 3L);
+        String groupId = 1L;
+        List<String> contactIds = Arrays.asList(1L, 2L, 3L);
         
         when(contactGroupRepo.findContactIdsByGroupId(groupId)).thenReturn(contactIds);
 
-        List<Long> result = filterService.findContactsByGroupId(groupId);
+        List<String> result = filterService.findContactsByGroupId(groupId);
 
         assertEquals(3, result.size());
         assertTrue(result.contains(1L));
@@ -41,11 +41,11 @@ public class ContactFilterServiceTest {
 
     @Test
     public void testFindContactsByGroupIdEmpty() {
-        Long groupId = 999L;
+        String groupId = 999L;
         
         when(contactGroupRepo.findContactIdsByGroupId(groupId)).thenReturn(Arrays.asList());
 
-        List<Long> result = filterService.findContactsByGroupId(groupId);
+        List<String> result = filterService.findContactsByGroupId(groupId);
 
         assertTrue(result.isEmpty());
         verify(contactGroupRepo, times(1)).findContactIdsByGroupId(groupId);
@@ -53,8 +53,8 @@ public class ContactFilterServiceTest {
 
     @Test
     public void testIsContactInGroup() {
-        Long contactId = 1L;
-        Long groupId = 1L;
+        String contactId = 1L;
+        String groupId = 1L;
         
         when(contactGroupRepo.isContactInGroup(contactId, groupId)).thenReturn(true);
 
@@ -66,8 +66,8 @@ public class ContactFilterServiceTest {
 
     @Test
     public void testIsContactNotInGroup() {
-        Long contactId = 1L;
-        Long groupId = 2L;
+        String contactId = 1L;
+        String groupId = 2L;
         
         when(contactGroupRepo.isContactInGroup(contactId, groupId)).thenReturn(false);
 
@@ -79,8 +79,8 @@ public class ContactFilterServiceTest {
 
     @Test
     public void testAddContactToGroup() {
-        Long contactId = 1L;
-        Long groupId = 1L;
+        String contactId = 1L;
+        String groupId = 1L;
         
         filterService.addContactToGroup(contactId, groupId);
         
@@ -89,8 +89,8 @@ public class ContactFilterServiceTest {
 
     @Test
     public void testRemoveContactFromGroup() {
-        Long contactId = 1L;
-        Long groupId = 1L;
+        String contactId = 1L;
+        String groupId = 1L;
         
         filterService.removeContactFromGroup(contactId, groupId);
         

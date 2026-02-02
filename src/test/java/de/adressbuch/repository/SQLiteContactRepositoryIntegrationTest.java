@@ -1,6 +1,8 @@
 package de.adressbuch.repository;
 
 import de.adressbuch.models.Contact;
+import de.adressbuch.util.Utils;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,8 @@ public class SQLiteContactRepositoryIntegrationTest {
 
     @Test
     public void testSaveAndFindContact() {
-        Contact contact = Contact.create(
+        Contact contact = new Contact(
+            Utils.generateId(),
             "Sample Contact", 
             Optional.of("3325234234"),
             Optional.of("Samplestrasse 5, 66534 Samplebrücken"),
@@ -32,12 +35,13 @@ public class SQLiteContactRepositoryIntegrationTest {
         
         List<Contact> allContacts = contactRepository.findAll();
         assertFalse(allContacts.isEmpty());
-        assertEquals("Sample Contact", allContacts.get(0).getName());
+        assertEquals("Sample Contact", allContacts.get(0).name());
     }
 
     @Test
     public void testUpdateContact() {
-        Contact contact = Contact.create(
+        Contact contact = new Contact(
+            Utils.generateId(),
             "Alter Name", 
             Optional.of("446452346"),
             Optional.empty(),
@@ -50,14 +54,15 @@ public class SQLiteContactRepositoryIntegrationTest {
         Contact updated = saved.withName("Neuer Name");
         contactRepository.update(updated);
         
-        Optional<Contact> retrieved = contactRepository.findById(saved.getId().get());
+        Optional<Contact> retrieved = contactRepository.findById(saved.id());
         assertTrue(retrieved.isPresent());
-        assertEquals("Neuer Name", retrieved.get().getName());
+        assertEquals("Neuer Name", retrieved.get().name());
     }
 
     @Test
     public void testDeleteContact() {
-        Contact contact = Contact.create(
+        Contact contact = new Contact(
+            Utils.generateId(),
             "Temp", 
             Optional.empty(),
             Optional.empty(),
@@ -67,7 +72,7 @@ public class SQLiteContactRepositoryIntegrationTest {
         List<Contact> before = contactRepository.findAll();
         int countBefore = before.size();
         
-        Long id = before.get(0).getId().get();
+        String id = before.get(0).id();
         contactRepository.deleteById(id);
         
         List<Contact> after = contactRepository.findAll();

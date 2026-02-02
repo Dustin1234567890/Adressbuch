@@ -40,7 +40,7 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
     }
 
     @Override
-    public void addContactToGroup(Long contactId, Long groupId) {
+    public void addContactToGroup(String contactId, String groupId) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -54,7 +54,7 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
     }
 
     @Override
-    public void removeContactFromGroup(Long contactId, Long groupId) {
+    public void removeContactFromGroup(String contactId, String groupId) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -67,21 +67,21 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
     }
 
     @Override
-    public List<Long> findContactIdsByGroupId(Long groupId) {
+    public List<String> findContactIdsByGroupId(String groupId) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             return create.select(field("contact_id"))
                 .from(TABLE_NAME)
                 .where(field("group_id").eq(groupId))
-                .fetch(r -> r.get("contact_id", Long.class));
+                .fetch(r -> r.get("contact_id", String.class));
         } catch (SQLException e) {
             throw new RuntimeException("error finding contactsbygroup", e);
         }
     }
 
     @Override
-    public boolean isContactInGroup(Long contactId, Long groupId) {
+    public boolean isContactInGroup(String contactId, String groupId) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 

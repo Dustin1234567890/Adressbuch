@@ -16,7 +16,8 @@ public class ContactService {
 
     public Contact addContact(String name, String phoneNumber, String address, String email) {
         validateContactName(name);
-        Contact contact = Contact.create(
+        Contact contact = new Contact(
+            Utils.generateId(),
             name,
             Utils.convertToOptionalNonBlank(phoneNumber),
             Utils.convertToOptionalNonBlank(address),
@@ -25,11 +26,14 @@ public class ContactService {
         return contactRepository.save(contact);
     }
 
-    public Contact updateContact(Long id, String name, String phoneNumber, String address, String email) {
-        Contact existing = findContactById(id).orElseThrow();
+    public Contact updateContact(String id, String name, String phoneNumber, String address, String email) {
+        Optional<Contact> existing = findContactById(id);
+        if(existing.isEmpty()){
+            throw new IllegalArgumentException("Contact does not exist" + id);
+        }
         validateContactName(name);
         
-        Contact updated = Contact.of(
+        Contact updated = new Contact(
             id,
             name,
             Utils.convertToOptionalNonBlank(phoneNumber),
@@ -39,7 +43,7 @@ public class ContactService {
         return contactRepository.update(updated);
     }
 
-    public boolean deleteContact(Long id) {
+    public boolean deleteContact(String id) {
         Optional<Contact> deleted = contactRepository.deleteById(id);
         if (deleted.isEmpty()) {
             throw new IllegalArgumentException("Contact not found with id: " + id);
@@ -47,7 +51,7 @@ public class ContactService {
         return true;
     }
 
-    public Optional<Contact> findContactById(Long id) {
+    public Optional<Contact> findContactById(String id) {
         return contactRepository.findById(id);
     }
 

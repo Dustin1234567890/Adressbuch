@@ -2,6 +2,7 @@ package de.adressbuch.service;
 
 import de.adressbuch.models.User;
 import de.adressbuch.repository.interfaces.UserRepo;
+import de.adressbuch.util.Utils;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,17 +16,23 @@ public class UserService {
 
     public User addUser(String username, String displayedName) {
         validateUsername(username);
-        User user = User.create(username, displayedName);
+        User user = new User(
+            Utils.generateId(),
+            username,
+            Utils.convertToOptionalNonBlank(displayedName));
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, String username, String displayedName) {
+    public User updateUser(String id, String username, String displayedName) {
         validateUsername(username);
-        User user = User.of(id, username, displayedName);
+        User user = new User(
+            id,
+            username,
+            Utils.convertToOptionalNonBlank(displayedName));
         return userRepository.update(user);
     }
 
-    public boolean deleteUser(Long id) {
+    public boolean deleteUser(String id) {
         Optional<User> deleted = userRepository.deleteById(id);
         if (deleted.isEmpty()) {
             throw new IllegalArgumentException("User not found with id: " + id);
@@ -33,7 +40,7 @@ public class UserService {
         return true;
     }
 
-    public Optional<User> findUserById(Long id) {
+    public Optional<User> findUserById(String id) {
         return userRepository.findById(id);
     }
 

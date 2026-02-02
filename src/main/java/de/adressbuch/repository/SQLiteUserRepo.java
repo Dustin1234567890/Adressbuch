@@ -13,6 +13,7 @@ import org.jooq.SQLDialect;
 import org.jooq.DSLContext;
 
 import de.adressbuch.repository.interfaces.UserRepo;
+import de.adressbuch.util.Utils;
 
 public class SQLiteUserRepo implements UserRepo {
     private final String dbUrl;
@@ -48,14 +49,12 @@ public class SQLiteUserRepo implements UserRepo {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
-            Long id = create.insertInto(table(TABLE_NAME))
-                .columns(field("username"), field("displayedName"))
-                .values(user.getUserName(), user.getDisplayedName().orElse(null))
-                .returning(field("id"))
-                .fetchOne()
-                .get(field("id"), Long.class);
+            create.insertInto(table(TABLE_NAME))
+                .columns(field("id"), field("username"), field("displayedName"))
+                .values(user.id(), user.username(), user.displayedName().orElse(null))
+                .execute();
 
-            return user.withId(id);
+            return user;
         } catch (SQLException e) {
             throw new RuntimeException("error saving user", e);
         }
@@ -67,9 +66,9 @@ public class SQLiteUserRepo implements UserRepo {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.update(table(TABLE_NAME))
-                .set(field("username"), user.getUserName())
-                .set(field("displayedName"), user.getDisplayedName().orElse(null))
-                .where(field("id").eq(user.getId().orElse(null)))
+                .set(field("username"), user.username())
+                .set(field("displayedName"), user.displayedName().orElse(null))
+                .where(field("id").eq(user.id()))
                 .execute();
 
             return user;
@@ -79,7 +78,7 @@ public class SQLiteUserRepo implements UserRepo {
     }
 
     @Override
-    public Optional<User> deleteById(Long id) {
+    public Optional<User> deleteById(String id) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -92,10 +91,10 @@ public class SQLiteUserRepo implements UserRepo {
                 return Optional.empty();
             }
 
-            User user = User.of(
-                ret.get("id", Long.class),
+            User user = new User(
+                ret.get("id", String.class),
                 ret.get("username", String.class),
-                ret.get("displayedName", String.class)
+                Utils.convertToOptionalNonBlank(ret.get("displayedName", String.class))
             );
 
             create.deleteFrom(table(TABLE_NAME))
@@ -109,7 +108,7 @@ public class SQLiteUserRepo implements UserRepo {
     }
 
     @Override
-    public Optional<User> findById(Long id) {
+    public Optional<User> findById(String id) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -122,10 +121,10 @@ public class SQLiteUserRepo implements UserRepo {
                 return Optional.empty();
             }
 
-            User user = User.of(
-                ret.get("id", Long.class),
+            User user = new User(
+                ret.get("id", String.class),
                 ret.get("username", String.class),
-                ret.get("displayedName", String.class)
+                Utils.convertToOptionalNonBlank(ret.get("displayedName", String.class))
             );
 
             return Optional.of(user);
@@ -148,10 +147,10 @@ public class SQLiteUserRepo implements UserRepo {
                 return Optional.empty();
             }
 
-            User user = User.of(
-                ret.get("id", Long.class),
+            User user = new User(
+                ret.get("id", String.class),
                 ret.get("username", String.class),
-                ret.get("displayedName", String.class)
+                Utils.convertToOptionalNonBlank(ret.get("displayedName", String.class))
             );
 
             return Optional.of(user);
@@ -167,10 +166,10 @@ public class SQLiteUserRepo implements UserRepo {
 
             return create.select()
                 .from(TABLE_NAME)
-                .fetch(record -> User.of(
-                    record.get("id", Long.class),
+                .fetch(record -> new User(
+                    record.get("id", String.class),
                     record.get("username", String.class),
-                    record.get("displayedName", String.class)
+                    Utils.convertToOptionalNonBlank(record.get("displayedName", String.class))
                 ));
         } catch (SQLException e) {
             throw new RuntimeException("error finding list of all users", e);

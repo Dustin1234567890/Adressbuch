@@ -49,14 +49,12 @@ public class SQLiteGroupRepo implements GroupRepo {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
-            Long id = create.insertInto(table(TABLE_NAME))
-                .columns(field("name"), field("description"))
-                .values(group.getName(), group.getDescription().orElse(null))
-                .returning(field("id"))
-                .fetchOne()
-                .get(field("id"), Long.class);
+            create.insertInto(table(TABLE_NAME))
+                .columns(field("id"), field("name"), field("description"))
+                .values(group.id(), group.name(), group.description().orElse(null))
+                .execute();
 
-            return group.withId(id);
+            return group;
         } catch (SQLException e) {
             throw new RuntimeException("error saving group", e);
         }
@@ -68,9 +66,9 @@ public class SQLiteGroupRepo implements GroupRepo {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.update(table(TABLE_NAME))
-                .set(field("name"), group.getName())
-                .set(field("description"), group.getDescription().orElse(null))
-                .where(field("id").eq(group.getId().orElse(null)))
+                .set(field("name"), group.name())
+                .set(field("description"), group.description().orElse(null))
+                .where(field("id").eq(group.id()))
                 .execute();
 
             return group;
@@ -80,7 +78,7 @@ public class SQLiteGroupRepo implements GroupRepo {
     }
 
     @Override
-    public Optional<Group> deleteById(Long id) {
+    public Optional<Group> deleteById(String id) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -93,8 +91,8 @@ public class SQLiteGroupRepo implements GroupRepo {
                 return Optional.empty();
             }
 
-            Group group = Group.of(
-                ret.get("id", Long.class),
+            Group group = new Group(
+                ret.get("id", String.class),
                 ret.get("name", String.class),
                 Utils.convertToOptionalNonBlank(ret.get("description", String.class))
             );
@@ -110,7 +108,7 @@ public class SQLiteGroupRepo implements GroupRepo {
     }
 
     @Override
-    public Optional<Group> findById(Long id) {
+    public Optional<Group> findById(String id) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -123,8 +121,8 @@ public class SQLiteGroupRepo implements GroupRepo {
                 return Optional.empty();
             }
 
-            Group group = Group.of(
-                ret.get("id", Long.class),
+            Group group = new Group(
+                ret.get("id", String.class),
                 ret.get("name", String.class),
                 Utils.convertToOptionalNonBlank(ret.get("description", String.class))
             );
@@ -149,8 +147,8 @@ public class SQLiteGroupRepo implements GroupRepo {
                 return Optional.empty();
             }
 
-            Group group = Group.of(
-                ret.get("id", Long.class),
+            Group group = new Group(
+                ret.get("id", String.class),
                 ret.get("name", String.class),
                 Utils.convertToOptionalNonBlank(ret.get("description", String.class))
             );
@@ -168,8 +166,8 @@ public class SQLiteGroupRepo implements GroupRepo {
 
             return create.select()
                 .from(TABLE_NAME)
-                .fetch(record -> Group.of(
-                    record.get("id", Long.class),
+                .fetch(record -> new Group(
+                    record.get("id", String.class),
                     record.get("name", String.class),
                     Utils.convertToOptionalNonBlank(record.get("description", String.class))
                 ));

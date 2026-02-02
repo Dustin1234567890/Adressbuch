@@ -14,7 +14,7 @@ Was es können soll:
    - Import/Export der Kontaktliste (z. B. als CSV)
 
 # Requirements:
-Java Version 17+
+Java Version 21+
 Maven Latest Version
 
 # Initial Setup:

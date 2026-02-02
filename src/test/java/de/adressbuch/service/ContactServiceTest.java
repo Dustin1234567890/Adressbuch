@@ -2,6 +2,8 @@ package de.adressbuch.service;
 
 import de.adressbuch.models.Contact;
 import de.adressbuch.repository.interfaces.ContactRepo;
+import de.adressbuch.util.Utils;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,29 +36,32 @@ public class ContactServiceTest {
 
     @Test
     public void testGetContactById() {
-        Contact contact = Contact.of(1L, "Neuer Sample Kontakt", Optional.of("424235263"), Optional.empty(), Optional.of("sample@tester.de"));
-        when(contactRepository.findById(1L)).thenReturn(Optional.of(contact));
+        String id = Utils.generateId();
+        Contact contact = new Contact(id, "Neuer Sample Kontakt", Optional.of("424235263"), Optional.empty(), Optional.of("sample@tester.de"));
+        when(contactRepository.findById(id)).thenReturn(Optional.of(contact));
 
-        Optional<Contact> result = contactService.findContactById(1L);
+        Optional<Contact> result = contactService.findContactById(id);
 
-        assertEquals("Neuer Sample Kontakt", result.get().getName());
-        verify(contactRepository, times(1)).findById(1L);
+        assertEquals("Neuer Sample Kontakt", result.get().name());
+        verify(contactRepository, times(1)).findById(id);
     }
 
     @Test
     public void testGetContactByIdNotFound() {
-        when(contactRepository.findById(999L)).thenReturn(Optional.empty());
+        String id = Utils.generateId();
+        when(contactRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> contactService.findContactById(999L).orElseThrow(() -> new IllegalArgumentException("not found")));
+        assertThrows(IllegalArgumentException.class, () -> contactService.findContactById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
     @Test
     public void testDeleteContact() {
-        Contact contact = Contact.of(1L, "Neuer Sample Kontakt", Optional.of("424235263"), Optional.empty(), Optional.of("sample@tester.de"));
-        when(contactRepository.deleteById(1L)).thenReturn(Optional.of(contact));
+        String id = Utils.generateId();
+        Contact contact = new Contact(id, "Neuer Sample Kontakt", Optional.of("424235263"), Optional.empty(), Optional.of("sample@tester.de"));
+        when(contactRepository.deleteById(id)).thenReturn(Optional.of(contact));
 
-        contactService.deleteContact(1L);
+        contactService.deleteContact(id);
 
-        verify(contactRepository, times(1)).deleteById(1L);
+        verify(contactRepository, times(1)).deleteById(id);
     }
 }

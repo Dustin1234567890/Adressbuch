@@ -65,9 +65,9 @@ public class ContactImportExportServiceTest {
         List<Contact> result = importExportService.importFromCSV(tmp.toString());
 
         assertEquals(2, result.size());
-        assertEquals("Toimport Sample", result.get(0).getName());
-        assertEquals("Toimport Sample2", result.get(1).getName());
-        assertEquals("524234243", result.get(0).getPhoneNumber().orElse(null));
+        assertEquals("Toimport Sample", result.get(0).name());
+        assertEquals("Toimport Sample2", result.get(1).name());
+        assertEquals("524234243", result.get(0).phoneNumber().orElse(null));
     }
 
     @Test
@@ -78,9 +78,9 @@ public class ContactImportExportServiceTest {
 
         List<Contact> result = importExportService.importFromCSV(tmp.toString());
         assertEquals(1, result.size());
-        assertEquals("Sample Name", result.get(0).getName());
-        assertTrue(result.get(0).getPhoneNumber().isPresent());
-        assertFalse(result.get(0).getAddress().isPresent());
+        assertEquals("Sample Name", result.get(0).name());
+        assertTrue(result.get(0).phoneNumber().isPresent());
+        assertFalse(result.get(0).address().isPresent());
     }
 
     @Test
@@ -108,8 +108,8 @@ public class ContactImportExportServiceTest {
         List<Contact> importedContacts = importExportService.importFromCSV(tmpfile.toString());
 
         assertEquals(2, importedContacts.size());
-        assertEquals(originalContacts.get(0).getName(), importedContacts.get(0).getName());
-        assertEquals(originalContacts.get(1).getName(), importedContacts.get(1).getName());
+        assertEquals(originalContacts.get(0).name(), importedContacts.get(0).name());
+        assertEquals(originalContacts.get(1).name(), importedContacts.get(1).name());
     }
 
     @Test
@@ -126,7 +126,7 @@ public class ContactImportExportServiceTest {
 
         List<Contact> importedContacts = importExportService.importFromCSV(tempFile.toString());
 
-        assertEquals("%§, TEst!@#", importedContacts.get(0).getName());
+        assertEquals("%§, TEst!@#", importedContacts.get(0).name());
     }
 }
 */

@@ -5,7 +5,7 @@ import de.adressbuch.util.Utils;
 
 import java.util.List;
 import java.util.Optional;
-
+import java.util.UUID;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.DriverManager;
@@ -34,7 +34,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.createTableIfNotExists(table(TABLE_NAME))
-                .column(field("id"), org.jooq.impl.SQLDataType.BIGINT.identity(true))
+                .column(field("id"), org.jooq.impl.SQLDataType.VARCHAR.identity(true))
                 .column(field("name"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .column(field("phone"), org.jooq.impl.SQLDataType.VARCHAR)
                 .column(field("address"), org.jooq.impl.SQLDataType.VARCHAR)
@@ -52,14 +52,12 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
-            Long id = create.insertInto(table(TABLE_NAME))
-                .columns(field("name"), field("phone"), field("address"), field("email"))
-                .values(contact.getName(), contact.getPhoneNumber(), contact.getAddress(), contact.getEmail())
-                .returning(field("id"))
-                .fetchOne()
-                .get(field("id"), Long.class);
+            create.insertInto(table(TABLE_NAME))
+                .columns(field("id"), field("name"), field("phone"), field("address"), field("email"))
+                .values(contact.id(), contact.name(), contact.phoneNumber(), contact.address(), contact.email())
+                .execute();
 
-            return contact.withId(id);
+            return contact;
         } catch (SQLException e) {
             throw new RuntimeException("error saving contact", e);
         }
@@ -71,11 +69,11 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.update(table(TABLE_NAME))
-                .set(field("name"), contact.getName())
-                .set(field("phoneNumber"), contact.getPhoneNumber())
-                .set(field("address"), contact.getAddress())
-                .set(field("email"), contact.getEmail())
-                .where(field("id").eq(contact.getId()))
+                .set(field("name"), contact.name())
+                .set(field("phoneNumber"), contact.phoneNumber())
+                .set(field("address"), contact.address())
+                .set(field("email"), contact.email())
+                .where(field("id").eq(contact.id()))
                 .execute();
 
             return contact;
@@ -85,7 +83,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
     }
 
     @Override
-    public Optional<Contact> deleteById(Long id) {
+    public Optional<Contact> deleteById(String id) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -98,8 +96,8 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                 return Optional.empty();
             }
 
-            Contact contact = Contact.of(
-                ret.get("id", Long.class),
+            Contact contact = new Contact(
+                ret.get("id", String.class),
                 ret.get("name", String.class),
                 Utils.convertToOptionalNonBlank(ret.get("phone", String.class)),
                 Utils.convertToOptionalNonBlank(ret.get("address", String.class)),
@@ -117,7 +115,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
     }
 
     @Override
-    public Optional<Contact> findById(Long id) {
+    public Optional<Contact> findById(String id) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
@@ -130,8 +128,8 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                 return Optional.empty();
             }
 
-            Contact contact = Contact.of(
-                ret.get("id", Long.class),
+            Contact contact = new Contact(
+                ret.get("id", String.class),
                 ret.get("name", String.class),
                 Utils.convertToOptionalNonBlank(ret.get("phone", String.class)),
                 Utils.convertToOptionalNonBlank(ret.get("address", String.class)),
@@ -151,8 +149,8 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
 
             return create.select()
                 .from(table(TABLE_NAME))
-                .fetch(record -> Contact.of(
-                    record.get("id", Long.class),
+                .fetch(record -> new Contact(
+                    record.get("id", String.class),
                     record.get("name", String.class),
                     Utils.convertToOptionalNonBlank(record.get("phone", String.class)),
                     Utils.convertToOptionalNonBlank(record.get("address", String.class)),
@@ -173,8 +171,8 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
             return create.select()
                     .from(table(TABLE_NAME))
                     .where(DSL.lower(field("name", String.class)).like(likePattern))
-                    .fetch(record -> Contact.of(
-                            record.get("id", Long.class),
+                    .fetch(record -> new Contact(
+                            record.get("id", String.class),
                             record.get("name", String.class),
                             Utils.convertToOptionalNonBlank(record.get("phone", String.class)),
                             Utils.convertToOptionalNonBlank(record.get("address", String.class)),

@@ -103,12 +103,13 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             for (Contact c : contacts) {
                 System.out.printf(
+                        //TODO check formatting with UUIDs
                         "%-5d | %-20s | %-15s | %-25s | %-30s%n",
-                        c.getId().orElse(-1L),
-                        c.getName(),
-                        c.getPhoneNumber().orElse("-"),
-                        c.getEmail().orElse("-"),
-                        c.getAddress().orElse("-")
+                        c.id(),
+                        c.name(),
+                        c.phoneNumber().orElse("-"),
+                        c.email().orElse("-"),
+                        c.address().orElse("-")
                 );
             }
             return 0;
@@ -136,11 +137,11 @@ public class AdressbuchCLI implements Callable<Integer> {
             for (Contact c : results) {
                 System.out.printf(
                         "%-5d | %-20s | %-15s | %-25s | %-30s%n",
-                        c.getId().orElse(-1L),
-                        c.getName(),
-                        c.getPhoneNumber().orElse("-"),
-                        c.getEmail().orElse("-"),
-                        c.getAddress().orElse("-")
+                        c.id(),
+                        c.name(),
+                        c.phoneNumber().orElse("-"),
+                        c.email().orElse("-"),
+                        c.address().orElse("-")
                 );
             }
             return 0;
@@ -150,7 +151,7 @@ public class AdressbuchCLI implements Callable<Integer> {
     @Command(name = "update", description = "Kontakt aktualisieren")
     public static class UpdateContactCommand implements Callable<Integer> {
         @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
-        private Long id;
+        private String id;
 
         @Option(names = {"-n", "--name"}, description = "Neuer Name")
         private String name;
@@ -181,7 +182,7 @@ public class AdressbuchCLI implements Callable<Integer> {
     @Command(name = "delete", description = "Kontakt löschen")
     public static class DeleteContactCommand implements Callable<Integer> {
         @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
-        private Long id;
+        private String id;
 
         @Override
         public Integer call() {
@@ -248,10 +249,11 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             for (Group g : groups) {
                 System.out.printf(
+                    //TODO Formatting string uuid
                     "%-5d | %-20s | %-40s%n",
-                    g.getId().orElse(-1L),
-                    g.getName(),
-                    g.getDescription().orElse("-")
+                    g.id(),
+                    g.name(),
+                    g.description().orElse("-")
                 );
             }
             return 0;
@@ -261,7 +263,7 @@ public class AdressbuchCLI implements Callable<Integer> {
     @Command(name = "delete", description = "Gruppe löschen")
     public static class DeleteGroupCommand implements Callable<Integer> {
         @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
-        private Long id;
+        private String id;
 
         @Override
         public Integer call() {

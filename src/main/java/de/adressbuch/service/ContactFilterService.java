@@ -14,8 +14,8 @@ public class ContactFilterService {
         this.contactGroupRepository = contactGroupRepository;
     }
 
-    public List<Contact> filterContactsByGroup(Long groupId) {
-        List<Long> contactIds = contactGroupRepository.findContactIdsByGroupId(groupId);
+    public List<Contact> filterContactsByGroup(String groupId) {
+        List<String> contactIds = contactGroupRepository.findContactIdsByGroupId(groupId);
         return contactIds.stream()
                 .flatMap(id -> contactService.findContactById(id).stream())
                 .toList();
@@ -23,19 +23,19 @@ public class ContactFilterService {
 
     public List<Contact> filterContactsByPhoneExists() {
         return contactService.findAllContacts().stream()
-                .filter(c -> c.getPhoneNumber().isPresent())
+                .filter(c -> c.phoneNumber().isPresent())
                 .toList();
     }
 
     public List<Contact> filterContactsByEmailExists() {
         return contactService.findAllContacts().stream()
-                .filter(c -> c.getEmail().isPresent())
+                .filter(c -> c.email().isPresent())
                 .toList();
     }
 
     public List<Contact> filterContactsByAddressExists() {
         return contactService.findAllContacts().stream()
-                .filter(c -> c.getAddress().isPresent())
+                .filter(c -> c.address().isPresent())
                 .toList();
     }
 }

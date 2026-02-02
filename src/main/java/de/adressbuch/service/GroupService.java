@@ -16,18 +16,19 @@ public class GroupService {
 
     public Group addGroup(String name, String description) {
         validateGroupName(name);
-        Group group = Group.create(
+        Group group = new Group(
+            Utils.generateId(),
             name, 
             Utils.convertToOptionalNonBlank(description)
         );
         return groupRepository.save(group);
     }
 
-    public Group updateGroup(Long id, String name, String description) {
+    public Group updateGroup(String id, String name, String description) {
         Group existing = findGroupById(id).orElseThrow();
         validateGroupName(name);
         
-        Group updated = Group.of(
+        Group updated = new Group(
             id,
             name,
             Utils.convertToOptionalNonBlank(description)
@@ -35,7 +36,7 @@ public class GroupService {
         return groupRepository.update(updated);
     }
 
-    public boolean deleteGroup(Long id) {
+    public boolean deleteGroup(String id) {
         Optional<Group> deleted = groupRepository.deleteById(id);
         if (deleted.isEmpty()) {
             throw new IllegalArgumentException("Group not found with id: " + id);
@@ -43,7 +44,7 @@ public class GroupService {
         return true;
     }
 
-    public Optional<Group> findGroupById(Long id) {
+    public Optional<Group> findGroupById(String id) {
         return groupRepository.findById(id);
     }
 

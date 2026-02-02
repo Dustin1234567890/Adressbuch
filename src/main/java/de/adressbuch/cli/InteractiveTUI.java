@@ -98,12 +98,13 @@ public class InteractiveTUI {
 
         for (Contact c : contacts) {
             System.out.printf(
+                //TODO check formatting with UUIDs
                     "%-5d | %-20s | %-15s | %-25s | %-30s%n",
-                    c.getId().orElse(-1L),
-                    c.getName(),
-                    c.getPhoneNumber().orElse("-"),
-                    c.getEmail().orElse("-"),
-                    c.getAddress().orElse("-")
+                    c.id(),
+                    c.name(),
+                    c.phoneNumber().orElse("-"),
+                    c.email().orElse("-"),
+                    c.address().orElse("-")
             );
         }
     }
@@ -150,24 +151,25 @@ public class InteractiveTUI {
         for (Contact c : results) {
             System.out.printf(
                     "%-5d | %-20s | %-15s | %-25s | %-30s%n",
-                    c.getId().orElse(-1L),
-                    c.getName(),
-                    c.getPhoneNumber().orElse("-"),
-                    c.getEmail().orElse("-"),
-                    c.getAddress().orElse("-")
+                    //TODO check formatting with UUIDs
+                    c.id(),
+                    c.name(),
+                    c.phoneNumber().orElse("-"),
+                    c.email().orElse("-"),
+                    c.address().orElse("-")
             );
         }
     }
 
     private void deleteContact() {
-        Long id;
+        String id;
         String response;
 
         System.out.println();
         System.out.println("=== Kontakt löschen ===");
 
         System.out.println("Bitte geben Sie die Kontakt-ID ein: ");
-        id = Long.valueOf(scanner.nextLine().trim());
+        id = String.valueOf(scanner.nextLine().trim());
 
         System.out.println("Möchten Sie wirklich den Kontakt von Ihrem Addressbuch löschen? Geben Sie \"Ja\" zum bestätigen ein.");
         response = scanner.nextLine().trim().toLowerCase();
@@ -225,10 +227,11 @@ public class InteractiveTUI {
 
         for (Group g : groups) {
             System.out.printf(
+                //TODO: formatting string uuid
                 "%-5d | %-20s | %-40s%n",
-                g.getId().orElse(-1L),
-                g.getName(),
-                g.getDescription().orElse("-")
+                g.id(),
+                g.name(),
+                g.description().orElse("-")
             );
         }
     }
@@ -253,14 +256,14 @@ public class InteractiveTUI {
     }
 
     private void deleteGroup() {
-        Long id;
+        String id;
         String response;
 
         System.out.println();
         System.out.println("=== Gruppe löschen ===");
 
         System.out.println("Bitte geben Sie die Gruppen-ID ein: ");
-        id = Long.valueOf(scanner.nextLine().trim());
+        id = String.valueOf(scanner.nextLine().trim());
 
         System.out.println("Möchten Sie wirklich die Gruppe von Ihrem Addressbuch löschen? Geben Sie \"Ja\" zum bestätigen ein.");
         response = scanner.nextLine().trim().toLowerCase();

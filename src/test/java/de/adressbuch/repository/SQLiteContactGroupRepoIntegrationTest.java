@@ -20,8 +20,8 @@ public class SQLiteContactGroupRepoIntegrationTest {
 
     @Test
     public void testAddContactToGroup() {
-        Long contactId = 1L;
-        Long groupId = 1L;
+        String contactId = 1L;
+        String groupId = 1L;
 
         contactGroupRepo.addContactToGroup(contactId, groupId);
 
@@ -30,8 +30,8 @@ public class SQLiteContactGroupRepoIntegrationTest {
 
     @Test
     public void testIsContactInGroup() {
-        Long contactId = 1L;
-        Long groupId = 1L;
+        String contactId = 1L;
+        String groupId = 1L;
 
         contactGroupRepo.addContactToGroup(contactId, groupId);
 
@@ -42,8 +42,8 @@ public class SQLiteContactGroupRepoIntegrationTest {
 
     @Test
     public void testIsContactNotInGroup() {
-        Long contactId = 1L;
-        Long groupId = 1L;
+        String contactId = 1L;
+        String groupId = 1L;
 
         boolean result = contactGroupRepo.isContactInGroup(contactId, groupId);
 
@@ -52,13 +52,13 @@ public class SQLiteContactGroupRepoIntegrationTest {
 
     @Test
     public void testFindContactIdsByGroupId() {
-        Long groupId = 1L;
+        String groupId = 1L;
 
         contactGroupRepo.addContactToGroup(1L, groupId);
         contactGroupRepo.addContactToGroup(2L, groupId);
         contactGroupRepo.addContactToGroup(3L, groupId);
 
-        List<Long> result = contactGroupRepo.findContactIdsByGroupId(groupId);
+        List<String> result = contactGroupRepo.findContactIdsByGroupId(groupId);
 
         assertEquals(3, result.size());
         assertTrue(result.contains(1L));
@@ -68,17 +68,17 @@ public class SQLiteContactGroupRepoIntegrationTest {
 
     @Test
     public void testFindContactIdsByGroupIdEmpty() {
-        Long groupId = 999L;
+        String groupId = 999L;
 
-        List<Long> result = contactGroupRepo.findContactIdsByGroupId(groupId);
+        List<String> result = contactGroupRepo.findContactIdsByGroupId(groupId);
 
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testRemoveContactFromGroup() {
-        Long contactId = 1L;
-        Long groupId = 1L;
+        String contactId = 1L;
+        String groupId = 1L;
 
         contactGroupRepo.addContactToGroup(contactId, groupId);
         assertTrue(contactGroupRepo.isContactInGroup(contactId, groupId));
@@ -94,8 +94,8 @@ public class SQLiteContactGroupRepoIntegrationTest {
         contactGroupRepo.addContactToGroup(1L, 2L);
         contactGroupRepo.addContactToGroup(2L, 1L);
 
-        List<Long> group1Contacts = contactGroupRepo.findContactIdsByGroupId(1L);
-        List<Long> group2Contacts = contactGroupRepo.findContactIdsByGroupId(2L);
+        List<String> group1Contacts = contactGroupRepo.findContactIdsByGroupId(1L);
+        List<String> group2Contacts = contactGroupRepo.findContactIdsByGroupId(2L);
 
         assertEquals(2, group1Contacts.size());
         assertEquals(1, group2Contacts.size());
