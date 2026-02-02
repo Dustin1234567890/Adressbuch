@@ -96,7 +96,7 @@ public class AdressbuchCLI implements Callable<Integer> {
             }
             
             System.out.printf(
-                    "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+                    "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                     "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
             System.out.println("---------------------------------------------------------------------------------------------");
@@ -129,7 +129,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
             System.out.printf(
-                "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+                "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                 "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
             System.out.println("---------------------------------------------------------------------------------------------");
@@ -244,16 +244,15 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
 
-            System.out.printf("%-5s | %-20s | %-40s%n", "ID", "Name", "Beschreibung");
+            System.out.printf("%-5s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
             System.out.println("---------------------------------------------------------------------");
 
             for (Group g : groups) {
                 System.out.printf(
-                    //TODO Formatting string uuid
                     "%-5d | %-20s | %-40s%n",
-                    g.id(),
-                    g.name(),
-                    g.description().orElse("-")
+                    g.getId().orElse(-1L),
+                    g.getName(),
+                    g.getDescription().orElse("-")
                 );
             }
             return 0;

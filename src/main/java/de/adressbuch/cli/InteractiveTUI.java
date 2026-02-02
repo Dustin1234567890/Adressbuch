@@ -16,9 +16,14 @@ public class InteractiveTUI {
     private boolean running = true;
     private boolean runningContacts = true;
     private boolean runningGroups = true;
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner;
 
     public InteractiveTUI() {
+        this(new Scanner(System.in));
+    }
+
+    public InteractiveTUI(Scanner scanner) {
+        this.scanner = scanner;
         this.contactService = new ContactService(new SQLiteContactRepo(DatabaseConfig.DB_URL));
         this.groupService = new GroupService(new SQLiteGroupRepo(DatabaseConfig.DB_URL));
     }
@@ -91,7 +96,7 @@ public class InteractiveTUI {
             return;
         }
         System.out.printf(
-            "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+            "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
             "ID", "Name", "Telefon", "E-Mail", "Adresse"
         );
         System.out.println("---------------------------------------------------------------------------------------------");
@@ -110,7 +115,6 @@ public class InteractiveTUI {
     }
 
     private void addContact() {
-        System.out.println();
         System.out.println("=== Neuen Kontakt hinzufügen ===");
 
         System.out.print("Name      : ");
@@ -143,7 +147,7 @@ public class InteractiveTUI {
             return;
         }
         System.out.printf(
-            "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+            "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
             "ID", "Name", "Telefon", "E-Mail", "Adresse"
         );
         System.out.println("---------------------------------------------------------------------------------------------");
@@ -222,16 +226,15 @@ public class InteractiveTUI {
             System.out.println("Keine Gruppen vorhanden");
             return;
         }
-        System.out.printf("%-5s | %-20s | %-40s%n", "ID", "Name", "Beschreibung");
+        System.out.printf("%-5s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
         System.out.println("---------------------------------------------------------------------");
 
         for (Group g : groups) {
             System.out.printf(
-                //TODO: formatting string uuid
                 "%-5d | %-20s | %-40s%n",
-                g.id(),
-                g.name(),
-                g.description().orElse("-")
+                g.getId(),
+                g.getName(),
+                g.getDescription().orElse("-")
             );
         }
     }
@@ -265,7 +268,11 @@ public class InteractiveTUI {
         System.out.println("Bitte geben Sie die Gruppen-ID ein: ");
         id = String.valueOf(scanner.nextLine().trim());
 
-        System.out.println("Möchten Sie wirklich die Gruppe von Ihrem Addressbuch löschen? Geben Sie \"Ja\" zum bestätigen ein.");
+        System.out.println(
+            "Möchten Sie die Gruppe wirklich aus Ihrem Adressbuch löschen?\n" +
+            "Geben Sie \"Ja\" ein, um den Vorgang fortzusetzen. " +
+            "Bei jeder anderen Eingabe wird der Vorgang abgebrochen."
+        );
         response = scanner.nextLine().trim().toLowerCase();
 
         if ("ja".equals(response)) {
