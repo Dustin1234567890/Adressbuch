@@ -104,7 +104,7 @@ public class InteractiveTUI {
         for (Contact c : contacts) {
             System.out.printf(
                 //TODO check formatting with UUIDs
-                    "%-5d | %-20s | %-15s | %-25s | %-30s%n",
+                    "%-5s | %-20s | %-15s | %-25s | %-30s%n",
                     c.id(),
                     c.name(),
                     c.phoneNumber().orElse("-"),
@@ -154,7 +154,7 @@ public class InteractiveTUI {
 
         for (Contact c : results) {
             System.out.printf(
-                    "%-5d | %-20s | %-15s | %-25s | %-30s%n",
+                    "%-5s | %-20s | %-15s | %-25s | %-30s%n",
                     //TODO check formatting with UUIDs
                     c.id(),
                     c.name(),
@@ -231,10 +231,10 @@ public class InteractiveTUI {
 
         for (Group g : groups) {
             System.out.printf(
-                "%-5d | %-20s | %-40s%n",
-                g.getId(),
-                g.getName(),
-                g.getDescription().orElse("-")
+                "%-5s | %-35.35s | %-60.60s%n",
+                g.id(),
+                g.name(),
+                g.description().orElse("-")
             );
         }
     }

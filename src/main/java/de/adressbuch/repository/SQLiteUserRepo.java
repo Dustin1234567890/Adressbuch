@@ -34,7 +34,7 @@ public class SQLiteUserRepo implements UserRepo {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.createTableIfNotExists(table(TABLE_NAME))
-                .column(field("id"), org.jooq.impl.SQLDataType.BIGINT.identity(true))
+                .column(field("id"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .column(field("username"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .column(field("displayedName"), org.jooq.impl.SQLDataType.VARCHAR)
                 .constraint(primaryKey(field("id")))

@@ -30,8 +30,8 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.createTableIfNotExists(table(TABLE_NAME))
-                .column(field("contact_id"), org.jooq.impl.SQLDataType.BIGINT.nullable(false))
-                .column(field("group_id"), org.jooq.impl.SQLDataType.BIGINT.nullable(false))
+                .column(field("contact_id"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
+                .column(field("group_id"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .constraint(primaryKey(field("contact_id"), field("group_id")))
                 .execute();
         } catch (SQLException e) {

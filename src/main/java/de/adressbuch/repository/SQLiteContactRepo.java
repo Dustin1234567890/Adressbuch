@@ -34,7 +34,8 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.createTableIfNotExists(table(TABLE_NAME))
-                .column(field("id"), org.jooq.impl.SQLDataType.VARCHAR.identity(true))
+                .column(field("id"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
+                //TODO: Validation for name (blank name crasht zurzeit, reprompt name? @Dustin)
                 .column(field("name"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .column(field("phone"), org.jooq.impl.SQLDataType.VARCHAR)
                 .column(field("address"), org.jooq.impl.SQLDataType.VARCHAR)
@@ -54,7 +55,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
 
             create.insertInto(table(TABLE_NAME))
                 .columns(field("id"), field("name"), field("phone"), field("address"), field("email"))
-                .values(contact.id(), contact.name(), contact.phoneNumber(), contact.address(), contact.email())
+                .values(contact.id(), contact.name(), contact.phoneNumber().orElse(null), contact.address().orElse(null), contact.email().orElse(null))
                 .execute();
 
             return contact;
@@ -70,9 +71,9 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
 
             create.update(table(TABLE_NAME))
                 .set(field("name"), contact.name())
-                .set(field("phoneNumber"), contact.phoneNumber())
-                .set(field("address"), contact.address())
-                .set(field("email"), contact.email())
+                .set(field("phone"), contact.phoneNumber().orElse(null))
+                .set(field("address"), contact.address().orElse(null))
+                .set(field("email"), contact.email().orElse(null))
                 .where(field("id").eq(contact.id()))
                 .execute();
 

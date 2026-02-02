@@ -34,7 +34,7 @@ public class SQLiteGroupRepo implements GroupRepo {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
             create.createTableIfNotExists(table(TABLE_NAME))
-                .column(field("id"), org.jooq.impl.SQLDataType.BIGINT.identity(true))
+                .column(field("id"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .column(field("name"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .column(field("description"), org.jooq.impl.SQLDataType.VARCHAR)
                 .constraint(primaryKey(field("id")))
