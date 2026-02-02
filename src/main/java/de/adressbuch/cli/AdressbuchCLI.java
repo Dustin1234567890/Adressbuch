@@ -96,14 +96,14 @@ public class AdressbuchCLI implements Callable<Integer> {
             }
             
             System.out.printf(
-                    "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+                    "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                     "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
             System.out.println("---------------------------------------------------------------------------------------------");
 
             for (Contact c : contacts) {
                 System.out.printf(
-                        "%-5d | %-20s | %-15s | %-25s | %-30s%n",
+                        "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                         c.getId().orElse(-1L),
                         c.getName(),
                         c.getPhoneNumber().orElse("-"),
@@ -128,14 +128,14 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
             System.out.printf(
-                "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+                "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                 "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
             System.out.println("---------------------------------------------------------------------------------------------");
 
             for (Contact c : results) {
                 System.out.printf(
-                        "%-5d | %-20s | %-15s | %-25s | %-30s%n",
+                        "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                         c.getId().orElse(-1L),
                         c.getName(),
                         c.getPhoneNumber().orElse("-"),
@@ -243,12 +243,12 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
 
-            System.out.printf("%-5s | %-20s | %-40s%n", "ID", "Name", "Beschreibung");
+            System.out.printf("%-5s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
             System.out.println("---------------------------------------------------------------------");
 
             for (Group g : groups) {
                 System.out.printf(
-                    "%-5d | %-20s | %-40s%n",
+                    "%-5s | %-35.35s | %-60.60s%n",
                     g.getId().orElse(-1L),
                     g.getName(),
                     g.getDescription().orElse("-")
