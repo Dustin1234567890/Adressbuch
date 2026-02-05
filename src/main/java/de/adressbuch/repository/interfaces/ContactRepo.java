@@ -11,6 +11,9 @@ public interface ContactRepo {
     Optional<Contact> deleteById(String id);
     Optional<Contact> findById(String id);
     List<Contact> findAll();
-    List<Contact> searchByName(String searchTerm);
+    Optional<List<Contact>> findByName(String name);
+    Optional<List<Contact>> findByPhone(String phone);
+    Optional<List<Contact>> findByEmail(String email);
+    Optional<List<Contact>> findByAddresse(String address);
     void initializeDatabase();
 }

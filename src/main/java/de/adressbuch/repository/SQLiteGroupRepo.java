@@ -134,26 +134,24 @@ public class SQLiteGroupRepo implements GroupRepo {
     }
 
     @Override
-    public Optional<Group> findByName(String name) {
+    public Optional<List<Group>> findByName(String name) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
-            var ret = create.select()
-                .from(TABLE_NAME)
-                .where(field("name").eq(name))
-                .fetchOne();
+            List<Group> groups = create.select()
+                .from(table(TABLE_NAME))
+                .where(field("name", String.class).eq(name))
+                .fetch(record -> new Group(
+                    record.get("id", String.class),
+                    record.get("name", String.class),
+                    Utils.convertToOptionalNonBlank(record.get("description", String.class))
+                ));
 
-            if (ret == null) {
+            if (groups.isEmpty()) {
                 return Optional.empty();
             }
 
-            Group group = new Group(
-                ret.get("id", String.class),
-                ret.get("name", String.class),
-                Utils.convertToOptionalNonBlank(ret.get("description", String.class))
-            );
-
-            return Optional.of(group);
+            return Optional.of(groups);
         } catch (SQLException e) {
             throw new RuntimeException("error finding group by name", e);
         }

@@ -35,7 +35,6 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
 
             create.createTableIfNotExists(table(TABLE_NAME))
                 .column(field("id"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
-                //TODO: Validation for name (blank name crasht zurzeit, reprompt name? @Dustin)
                 .column(field("name"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false))
                 .column(field("phone"), org.jooq.impl.SQLDataType.VARCHAR)
                 .column(field("address"), org.jooq.impl.SQLDataType.VARCHAR)
@@ -163,15 +162,34 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
     }
 
     @Override
-    public List<Contact> searchByName(String searchTerm) {
-        String likePattern = "%" + searchTerm.toLowerCase() + "%";
-
+    public Optional<List<Contact>> findByName(String search) {
         try (Connection c = getConnection()) {
             DSLContext create = using(c, SQLDialect.SQLITE);
 
-            return create.select()
+            List<Contact> contacts = create.select()
+                .from(table(TABLE_NAME))
+                .where(DSL.lower(field("name", String.class)).eq(search.toLowerCase()))
+                .fetch(record -> new Contact(
+                        record.get("id", String.class),
+                        record.get("name", String.class),
+                        Utils.convertToOptionalNonBlank(record.get("phone", String.class)),
+                        Utils.convertToOptionalNonBlank(record.get("address", String.class)),
+                        Utils.convertToOptionalNonBlank(record.get("email", String.class))
+                ));
+            return Optional.of(contacts);
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
+        }
+    }
+
+    @Override
+    public Optional<List<Contact>> findByPhone(String search) {
+        try (Connection c = getConnection()) {
+            DSLContext create = using(c, SQLDialect.SQLITE);
+
+            List<Contact> contacts = create.select()
                     .from(table(TABLE_NAME))
-                    .where(DSL.lower(field("name", String.class)).like(likePattern))
+                    .where(DSL.lower(field("phone", String.class)).eq(search.toLowerCase()))
                     .fetch(record -> new Contact(
                             record.get("id", String.class),
                             record.get("name", String.class),
@@ -179,8 +197,52 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                             Utils.convertToOptionalNonBlank(record.get("address", String.class)),
                             Utils.convertToOptionalNonBlank(record.get("email", String.class))
                     ));
+            return Optional.of(contacts);
         } catch (SQLException e) {
-            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + searchTerm, e);
+            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
+        }
+    }
+
+    @Override
+    public Optional<List<Contact>> findByEmail(String search) {
+
+        try (Connection c = getConnection()) {
+            DSLContext create = using(c, SQLDialect.SQLITE);
+
+            List<Contact> contacts = create.select()
+                    .from(table(TABLE_NAME))
+                    .where(DSL.lower(field("email", String.class)).eq(search.toLowerCase()))
+                    .fetch(record -> new Contact(
+                            record.get("id", String.class),
+                            record.get("name", String.class),
+                            Utils.convertToOptionalNonBlank(record.get("phone", String.class)),
+                            Utils.convertToOptionalNonBlank(record.get("address", String.class)),
+                            Utils.convertToOptionalNonBlank(record.get("email", String.class))
+                    ));
+            return Optional.of(contacts);
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
+        }
+    }
+
+    @Override
+    public Optional<List<Contact>> findByAddresse(String search) {
+        try (Connection c = getConnection()) {
+            DSLContext create = using(c, SQLDialect.SQLITE);
+
+            List<Contact> contacts = create.select()
+                    .from(table(TABLE_NAME))
+                    .where(DSL.lower(field("address", String.class)).eq(search.toLowerCase()))
+                    .fetch(record -> new Contact(
+                            record.get("id", String.class),
+                            record.get("name", String.class),
+                            Utils.convertToOptionalNonBlank(record.get("phone", String.class)),
+                            Utils.convertToOptionalNonBlank(record.get("address", String.class)),
+                            Utils.convertToOptionalNonBlank(record.get("email", String.class))
+                    ));
+            return Optional.of(contacts);
+        } catch (SQLException e) {
+            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
         }
     }
 }

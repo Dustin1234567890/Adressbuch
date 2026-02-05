@@ -1,18 +1,24 @@
 package de.adressbuch.cli;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import de.adressbuch.config.DatabaseConfig;
 import de.adressbuch.models.Contact;
 import de.adressbuch.models.Group;
+import de.adressbuch.repository.SQLiteContactGroupRepo;
 import de.adressbuch.repository.SQLiteContactRepo;
 import de.adressbuch.repository.SQLiteGroupRepo;
+import de.adressbuch.service.ContactGroupService;
 import de.adressbuch.service.ContactService;
 import de.adressbuch.service.GroupService;
 
 public class InteractiveTUI {
     private final ContactService contactService;
     private final GroupService groupService;
+    private static ContactGroupService contactGroupService;
     private boolean running = true;
     private boolean runningContacts = true;
     private boolean runningGroups = true;
@@ -26,6 +32,7 @@ public class InteractiveTUI {
         this.scanner = scanner;
         this.contactService = new ContactService(new SQLiteContactRepo(DatabaseConfig.DB_URL));
         this.groupService = new GroupService(new SQLiteGroupRepo(DatabaseConfig.DB_URL));
+        this.contactGroupService = new ContactGroupService(new SQLiteContactGroupRepo(DatabaseConfig.DB_URL), groupService, contactService);
     }
 
     public void start() {
@@ -72,20 +79,22 @@ public class InteractiveTUI {
         System.out.println("=== Kontaktverwaltung ===");
         System.out.println("1. Kontakte anzeigen");
         System.out.println("2. Kontakt hinzufügen");
-        System.out.println("3. Kontakt suchen");
-        System.out.println("4. Kontakt löschen");
-        System.out.println("5. Zurück");
+        System.out.println("3. Kontakt aktualisieren");
+        System.out.println("4. Kontakt suchen");
+        System.out.println("5. Kontakt löschen");
+        System.out.println("6. Zurück");
     }
 
     private void processChoiceContacts(String choice) {
         switch (choice) {
             case "1" -> showContacts();
             case "2" -> addContact();
-            case "3" -> searchContacts();
-            case "4" -> deleteContact();
-            case "5" -> runningContacts = false;
+            case "3" -> updateContact();
+            case "4" -> searchContacts();
+            case "5" -> deleteContact();
+            case "6" -> runningContacts = false;
             default -> {System.out.println("\"" + choice + "\" ist keine gültige Menüoption.");
-                        System.out.println("Bitte wählen Sie eine Zahl zwischen 1 und 5.");}
+                        System.out.println("Bitte wählen Sie eine Zahl zwischen 1 und 6.");}
         }
     }
 
@@ -96,20 +105,19 @@ public class InteractiveTUI {
             return;
         }
         System.out.printf(
-            "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+            "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
             "ID", "Name", "Telefon", "E-Mail", "Adresse"
         );
-        System.out.println("---------------------------------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
         for (Contact c : contacts) {
             System.out.printf(
-                //TODO check formatting with UUIDs
-                    "%-5s | %-20s | %-15s | %-25s | %-30s%n",
-                    c.id(),
-                    c.name(),
-                    c.phoneNumber().orElse("-"),
-                    c.email().orElse("-"),
-                    c.address().orElse("-")
+                "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                c.id(),
+                c.name(),
+                c.phoneNumber().orElse("-"),
+                c.email().orElse("-"),
+                c.address().orElse("-")
             );
         }
     }
@@ -119,6 +127,10 @@ public class InteractiveTUI {
 
         System.out.print("Name      : ");
         String name = scanner.nextLine();
+        if (name.isEmpty()) {
+            System.out.println("Name darf nicht leer sein. Vorgang abgebrochen.");
+            return;
+        }
 
         System.out.print("Telefon   : ");
         String phone = scanner.nextLine();
@@ -138,29 +150,95 @@ public class InteractiveTUI {
         System.out.println("E-Mail  : " + email);
     }
 
+    private void updateContact() {
+        System.out.println("=== Kontakt aktualisieren ===");
+
+        System.out.print("Bitte geben Sie die Kontakt-ID ein: ");
+        String id = scanner.nextLine().trim();
+
+        var existingContact = contactService.findContactById(id);
+        if (existingContact.isEmpty()) {
+            System.out.println("Kein Kontakt mit der ID " + id + " gefunden. Vorgang abgebrochen.");
+            return;
+        }
+        var existing = existingContact.get();
+
+        System.out.println("Aktueller Name: " + existing.name());
+        System.out.print("Neuer Name (leer lassen zum Beibehalten): ");
+        String name = scanner.nextLine();
+        if (name.isBlank()) {
+            name = existing.name();
+        }
+
+        System.out.println("Aktuelle Telefonnummer: " + existing.phoneNumber().orElse("-"));
+        System.out.print("Neue Telefonnummer (leer lassen zum Beibehalten): ");
+        String phone = scanner.nextLine();
+        if (phone.isBlank()) {
+            phone = existing.phoneNumber().orElse("");
+        }
+
+        System.out.println("Aktuelle Adresse: " + existing.address().orElse("-"));
+        System.out.print("Neue Adresse (leer lassen zum Beibehalten): ");
+        String adresse = scanner.nextLine();
+        if (adresse.isBlank()) {
+            adresse = existing.address().orElse("");
+        }
+
+        System.out.println("Aktuelle E-Mail: " + existing.email().orElse("-"));
+        System.out.print("Neue E-Mail (leer lassen zum Beibehalten): ");
+        String email = scanner.nextLine();
+        if (email.isBlank()) {
+            email = existing.email().orElse("");
+        }
+
+        contactService.updateContact(id, name, phone, adresse, email);
+
+        System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
+    }
+
     private void searchContacts() {
-        System.out.print("Suche    : ");
+        System.out.println("Suchauswahl : ");
+        System.out.println("1. ID");
+        System.out.println("2. Name");
+        System.out.println("3. Telefon");
+        System.out.println("4. E-Mail");
+        System.out.println("5. Adresse");
+        String choice = scanner.nextLine();
+
+        System.out.print("Suche nach: ");
         String term = scanner.nextLine();
-        var results = contactService.searchContactsByName(term);
+        Optional<List<Contact>> results;
+
+        switch (choice) {
+            case "1" -> results = contactService.findContactById(term).map(List::of);
+            case "2" -> results = contactService.findContactsByName(term);
+            case "3" -> results = contactService.findContactsByPhone(term);
+            case "4" -> results = contactService.findContactsByEmail(term);
+            case "5" -> results = contactService.findContactsByAddresse(term);
+            default -> {
+                System.out.println("Ungültige Suchauswahl.");
+                return;
+            }
+        }
+
         if (results.isEmpty()) {
             System.out.println("Kein Kontakt mit dem Suchbegriff " + term + " gefunden.");
             return;
         }
         System.out.printf(
-            "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+            "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
             "ID", "Name", "Telefon", "E-Mail", "Adresse"
         );
-        System.out.println("---------------------------------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
-        for (Contact c : results) {
+        for (Contact c : results.get()) {
             System.out.printf(
-                    "%-5s | %-20s | %-15s | %-25s | %-30s%n",
-                    //TODO check formatting with UUIDs
-                    c.id(),
-                    c.name(),
-                    c.phoneNumber().orElse("-"),
-                    c.email().orElse("-"),
-                    c.address().orElse("-")
+                "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                c.id(),
+                c.name(),
+                c.phoneNumber().orElse("-"),
+                c.email().orElse("-"),
+                c.address().orElse("-")
             );
         }
     }
@@ -205,18 +283,30 @@ public class InteractiveTUI {
         System.out.println("=== Gruppenverwaltung ===");
         System.out.println("1. Gruppen anzeigen");
         System.out.println("2. Gruppe hinzufügen");
-        System.out.println("3. Gruppe löschen");
-        System.out.println("4. Zurück");
+        System.out.println("3. Gruppe bearbeiten");
+        System.out.println("4. Gruppe suchen");
+        System.out.println("5. Gruppe löschen");
+        System.out.println("6. Kontakt einer Gruppe hinzufügen");
+        System.out.println("7. Kontakte einer Gruppe anzeigen");
+        System.out.println("8. Ist Kontakt in Gruppe?");
+        System.out.println("9. Kontakt einer Gruppe entfernen");
+        System.out.println("10. Zurück");
     }
 
     private void processChoiceGroups(String choice) {
         switch (choice) {
             case "1" -> showGroups();
             case "2" -> createGroup();
-            case "3" -> deleteGroup();
-            case "4" -> runningGroups = false;
+            case "3" -> updateGroup();
+            case "4" -> searchGroup();
+            case "5" -> deleteGroup();
+            case "6" -> addContactToGroup();
+            case "7" -> showContactsInGroup();
+            case "8" -> isContactInGroup();
+            case "9" -> removeContactFromGroup();
+            case "10" -> runningGroups = false;
             default -> {System.out.println("\"" + choice + "\" ist keine gültige Menüoption.");
-                        System.out.println("Bitte wählen Sie eine Zahl zwischen 1 und 4.");}
+                        System.out.println("Bitte wählen Sie eine Zahl zwischen 1 und 10.");}
         }
     }
 
@@ -226,12 +316,12 @@ public class InteractiveTUI {
             System.out.println("Keine Gruppen vorhanden");
             return;
         }
-        System.out.printf("%-5s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
-        System.out.println("---------------------------------------------------------------------");
+        System.out.printf("%-36.36s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
         for (Group g : groups) {
             System.out.printf(
-                "%-5s | %-35.35s | %-60.60s%n",
+                "%-36.36s | %-35.35s | %-60.60s%n",
                 g.id(),
                 g.name(),
                 g.description().orElse("-")
@@ -245,6 +335,10 @@ public class InteractiveTUI {
 
         System.out.print("Gruppenname   : ");
         String name = scanner.nextLine();
+        if (name.isEmpty()) {
+            System.out.println("Name darf nicht leer sein. Vorgang abgebrochen.");
+            return;
+        }
 
         System.out.print("Beschreibung  : ");
         String desc = scanner.nextLine();
@@ -256,6 +350,44 @@ public class InteractiveTUI {
         System.out.println("-----------------------------");
         System.out.println("Name          : " + name);
         System.out.println("Beschreibung  : " + (desc.isBlank() ? "-" : desc));
+    }
+
+    public void searchGroup() {
+        System.out.println("Suchauswahl : ");
+        System.out.println("1. ID");
+        System.out.println("2. Name");
+        System.out.println("3. Beschreibung");
+
+        String choice = scanner.nextLine();
+
+        System.out.print("Suche nach: ");
+        String term = scanner.nextLine();
+        Optional<List<Group>> results;
+
+        switch (choice) {
+            case "1" -> results = groupService.findGroupById(term).map(List::of);
+            case "2" -> results = groupService.findGroupByName(term);
+            default -> {
+                System.out.println("Ungültige Suchauswahl.");
+                return;
+            }
+        };
+
+        if (results.isEmpty()) {
+            System.out.println("Keine Gruppe mit dem Suchbegriff " + term + " gefunden.");
+            return;
+        }
+        System.out.printf("%-36.36s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        for (Group g : results.get()) {
+            System.out.printf(
+                "%-36.36s | %-35.35s | %-60.60s%n",
+                g.id(),
+                g.name(),
+                g.description().orElse("-")
+            );
+        }
     }
 
     private void deleteGroup() {
@@ -285,5 +417,165 @@ public class InteractiveTUI {
         }else {
             System.out.println("Der Löschvorgang wurde abgebrochen.");
         }
+    }
+
+    private void updateGroup() {
+        System.out.println();
+        System.out.println("=== Gruppe aktualisieren ===");
+
+        System.out.print("Gruppen-ID eingeben: ");
+        String id = scanner.nextLine().trim();
+
+        Optional<Group> existingGroup = groupService.findGroupById(id);
+        if (existingGroup.isEmpty()) {
+            System.out.println("Keine Gruppe mit der ID " + id + " gefunden.");
+            return;
+        }
+
+        Group group = existingGroup.get();
+
+        System.out.println("Aktueller Name: " + group.name());
+        System.out.print("Neuer Name (leer lassen, um nicht zu ändern): ");
+        String newName = scanner.nextLine().trim();
+        if (newName.isEmpty()) {
+            newName = group.name();
+        }
+
+        System.out.println("Aktuelle Beschreibung: " + group.description().orElse("-"));
+        System.out.print("Neue Beschreibung (leer lassen, um nicht zu ändern): ");
+        String newDesc = scanner.nextLine().trim();
+        if (newDesc.isEmpty()) {
+            newDesc = group.description().orElse("");
+        }
+
+        groupService.updateGroup(id, newName, newDesc);
+        
+        System.out.println("Gruppe erfolgreich aktualisiert.");
+        System.out.println("Neue Daten:");
+        System.out.println("Name: " + newName);
+        System.out.println("Beschreibung: " + (newDesc.isBlank() ? "-" : newDesc));
+    }
+
+    private void addContactToGroup() {
+        System.out.println("Geben Sie die ID der Gruppe ein, der Sie einen Kontakt hinzufügen möchten: ");
+        String groupId = scanner.nextLine().trim();
+        Optional<Group> existingGroup = groupService.findGroupById(groupId);
+        if (existingGroup.isEmpty()) {
+            System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+            return;
+        }
+
+        System.out.println("Geben Sie die ID des Kontakts ein, den Sie zur Gruppe hinzufügen möchten: ");
+        String contactId = scanner.nextLine().trim();
+        Optional<Contact> existingContact = contactService.findContactById(contactId);
+        if (existingContact.isEmpty()) {
+            System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+            return;
+        }
+
+        if (contactGroupService.isContactInGroup(contactId, groupId)) {
+            System.out.println("Kontakt ist bereits in der Gruppe.");
+            return;
+        }
+
+        contactGroupService.addContactToGroup(contactId, groupId);
+        System.out.println("Kontakt wurde zur Gruppe hinzugefügt.");
+    }
+
+    private void showContactsInGroup() {
+        System.out.println("Geben Sie die ID der Gruppe ein, deren Kontakte angezeigt werden sollen: ");
+        String groupId = scanner.nextLine().trim();
+        Optional<Group> existingGroup = groupService.findGroupById(groupId);
+        if (existingGroup.isEmpty()) {
+            System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+            return;
+        }
+
+        List<String> contactIds = contactGroupService.findContactIdsByGroupId(groupId);
+        if (contactIds.isEmpty()) {
+            System.out.println("Keine Kontakte in der Gruppe gefunden.");
+            return;
+        } else {
+            List<Contact> results = new ArrayList<>();
+
+            for (String contactId : contactIds) {
+                contactService.findContactById(contactId)
+                    .ifPresent(results::add);
+            }
+
+            if (results.isEmpty()) {
+                System.out.println("Keine gültigen Kontakte gefunden.");
+                return;
+            }
+            System.out.printf(
+                "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                "ID", "Name", "Telefon", "E-Mail", "Adresse"
+            );
+            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+            for (Contact c : results) {
+                System.out.printf(
+                    "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                    c.id(),
+                    c.name(),
+                    c.phoneNumber().orElse("-"),
+                    c.email().orElse("-"),
+                    c.address().orElse("-")
+                );
+            }
+        }
+    }
+
+    private void isContactInGroup() {
+        System.out.println("Geben Sie die ID der Gruppe ein, welche auf den Kontakt überprüft werden soll: ");
+        String groupId = scanner.nextLine().trim();
+
+        Optional<Group> existingGroup = groupService.findGroupById(groupId);
+        if (existingGroup.isEmpty()) {
+            System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+            return;
+        }
+
+        System.out.println("Geben Sie die ID des Kontakts ein, welcher auf die Gruppe überprüft werden soll: ");
+        String contactId = scanner.nextLine().trim();
+
+        Optional<Contact> existingContact = contactService.findContactById(contactId);
+        if (existingContact.isEmpty()) {
+            System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+            return;
+        }
+        
+        if (contactGroupService.isContactInGroup(contactId, groupId)) {
+            System.out.println("Der Kontakt " + existingContact.get().name() + " ist in der angegebenen Gruppe.");
+        } else {
+            System.out.println("Der Kontakt ist nicht in der Gruppe.");
+        }
+    }
+
+    private void removeContactFromGroup() {
+        System.out.println("Geben Sie die ID der Gruppe ein, aus der der Kontakt entfernt werden soll: ");
+        String groupId = scanner.nextLine().trim();
+
+        Optional<Group> existingGroup = groupService.findGroupById(groupId);
+        if (existingGroup.isEmpty()) {
+            System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+            return;
+        }
+
+        System.out.println("Geben Sie die ID des Kontakts ein, welcher aus der Gruppe entfernt werden soll: ");
+        String contactId = scanner.nextLine().trim();
+
+        Optional<Contact> existingContact = contactService.findContactById(contactId);
+        if (existingContact.isEmpty()) {
+            System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+            return;
+        }
+
+        if (contactGroupService.isContactInGroup(contactId, groupId)) {
+            contactGroupService.removeContactFromGroup(contactId, groupId);
+            System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
+        } else {
+            System.out.println("Der Kontakt war nicht in der Gruppe oder es gab ein Problem beim Entfernen.");
+        }   
     }
 }

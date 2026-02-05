@@ -1,17 +1,19 @@
 package de.adressbuch.cli;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import de.adressbuch.config.DatabaseConfig;
 import de.adressbuch.models.Contact;
 import de.adressbuch.models.Group;
+import de.adressbuch.repository.SQLiteContactGroupRepo;
 import de.adressbuch.repository.SQLiteContactRepo;
 import de.adressbuch.repository.SQLiteGroupRepo;
-import de.adressbuch.repository.SQLiteUserRepo;
+import de.adressbuch.service.ContactGroupService;
 import de.adressbuch.service.ContactService;
 import de.adressbuch.service.GroupService;
-import de.adressbuch.service.UserService;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -29,12 +31,12 @@ import picocli.CommandLine.Parameters;
 public class AdressbuchCLI implements Callable<Integer> {
     private static ContactService contactService;
     private static GroupService groupService;
-    private static UserService userService;
+    private static ContactGroupService contactGroupService;
 
     static {
         contactService = new ContactService(new SQLiteContactRepo(DatabaseConfig.DB_URL));
         groupService = new GroupService(new SQLiteGroupRepo(DatabaseConfig.DB_URL));
-        userService = new UserService(new SQLiteUserRepo(DatabaseConfig.DB_URL));
+        contactGroupService = new ContactGroupService(new SQLiteContactGroupRepo(DatabaseConfig.DB_URL), groupService, contactService);
     }
 
     @Override
@@ -61,6 +63,12 @@ public class AdressbuchCLI implements Callable<Integer> {
 
     @Command(name = "add", description = "Neuen Kontakt hinzufügen")
     public static class AddContactCommand implements Callable<Integer> {
+        private final ContactService contactService;
+
+        public AddContactCommand(ContactService contactService) {
+            this.contactService = contactService;
+        }
+
         @Option(names = {"-n", "--name"}, description = "Kontaktname", required = true)
         private String name;
 
@@ -96,20 +104,19 @@ public class AdressbuchCLI implements Callable<Integer> {
             }
             
             System.out.printf(
-                    "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                    "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                     "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
-            System.out.println("---------------------------------------------------------------------------------------------");
+            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
             for (Contact c : contacts) {
                 System.out.printf(
-                        //TODO check formatting with UUIDs
-                        "%-5s | %-20s | %-15s | %-25s | %-30s%n",
-                        c.id(),
-                        c.name(),
-                        c.phoneNumber().orElse("-"),
-                        c.email().orElse("-"),
-                        c.address().orElse("-")
+                    "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                    c.id(),
+                    c.name(),
+                    c.phoneNumber().orElse("-"),
+                    c.email().orElse("-"),
+                    c.address().orElse("-")
                 );
             }
             return 0;
@@ -118,25 +125,42 @@ public class AdressbuchCLI implements Callable<Integer> {
 
     @Command(name = "search", description = "Kontakte suchen")
     public static class SearchContactCommand implements Callable<Integer> {
-        @Parameters(index = "0", description = "Suchbegriff")
-        private String searchTerm;
+        public enum ContactSearchField {
+            name,
+            phone,
+            email,
+            address,
+            id
+        }
+
+        @Parameters(index = "0", description = "Suchfeld (name, phone, email, address, id)")
+        private ContactSearchField field;
+
+        @Parameters(index = "1", description = "Suchbegriff")
+        private String search;
 
         @Override
         public Integer call() {
-            List<Contact> results = contactService.searchContactsByName(searchTerm);
+            Optional<List<Contact>> results = switch (field) {
+                case name -> contactService.findContactsByName(search);
+                case phone -> contactService.findContactsByPhone(search);
+                case email -> contactService.findContactsByEmail(search);
+                case address -> contactService.findContactsByAddresse(search);
+                case id -> contactService.findContactById(search).map(List::of);
+            };
             if (results.isEmpty()) {
-                System.out.println("Kein Kontakt mit dem Suchbegriff " + searchTerm + " gefunden.");
+                System.out.println("Kein Kontakt mit dem Suchbegriff " + search + " gefunden.");
                 return 0;
             }
             System.out.printf(
-                "%-5s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                 "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
-            System.out.println("---------------------------------------------------------------------------------------------");
+            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
-            for (Contact c : results) {
+            for (Contact c : results.get()) {
                 System.out.printf(
-                        "%-5s | %-20s | %-15s | %-25s | %-30s%n",
+                        "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
                         c.id(),
                         c.name(),
                         c.phoneNumber().orElse("-"),
@@ -167,14 +191,36 @@ public class AdressbuchCLI implements Callable<Integer> {
 
         @Override
         public Integer call() {
-            contactService.updateContact(id, name, phone, address, email);
-            System.out.println(
-                "Kontakt erfolgreich aktualisiert.\n" +
-                (name != null ? "Name: " + name + "\n" : "") +
-                (phone != null ? "Telefon: " + phone + "\n" : "") +
-                (email != null ? "E-Mail: " + email + "\n" : "") +
-                (address != null ? "Adresse: " + address + "\n" : "")
+            Optional<Contact> existingContact = contactService.findContactById(id);
+
+            if (existingContact.isEmpty()) {
+                System.out.println("Kein Kontakt mit der ID " + id + " gefunden. Aktualisierung abgebrochen.");
+                return 0;
+            }
+
+            Contact existing = existingContact.get();
+
+            contactService.updateContact(
+                id,
+                name != null ? name : existing.name(),
+                phone != null ? phone : existing.phoneNumber().orElse(null),
+                address != null ? address : existing.address().orElse(null),
+                email != null ? email : existing.email().orElse(null)
             );
+
+            System.out.println("Kontakt erfolgreich aktualisiert:");
+            if (name != null) {
+            System.out.println("Name: " + existing.name() + " → " + name);
+            }
+            if (phone != null) {
+                System.out.println("Telefon: " + existing.phoneNumber().orElse("-") + " → " + phone);
+            }
+            if (email != null) {
+                System.out.println("E-Mail: " + existing.email().orElse("-") + " → " + email);
+            }
+            if (address != null) {
+                System.out.println("Adresse: " + existing.address().orElse("-") + " → " + address);
+            }
             return 0;
         }
     }
@@ -183,7 +229,6 @@ public class AdressbuchCLI implements Callable<Integer> {
     public static class DeleteContactCommand implements Callable<Integer> {
         @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
         private String id;
-
         @Override
         public Integer call() {
             boolean deleted = contactService.deleteContact(id);
@@ -200,12 +245,18 @@ public class AdressbuchCLI implements Callable<Integer> {
             subcommands = {
                 AddGroupCommand.class,
                 ListGroupsCommand.class,
-                DeleteGroupCommand.class
+                DeleteGroupCommand.class,
+                UpdateGroupCommand.class,
+                SearchGroupCommand.class,
+                AddContactToGroupCommand.class,
+                IsContactInGroupCommand.class,
+                ListContactsInGroupCommand.class,
+                RemoveContactFromGroupCommand.class
             })
     public static class GroupCommand implements Callable<Integer> {
         @Override
         public Integer call() {
-            System.out.println("Gruppen-Befehle: add, list, delete");
+            System.out.println("Gruppen-Befehle: add, list, delete, update, search");
             return 0;
         }
     }
@@ -244,12 +295,12 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
 
-            System.out.printf("%-5s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
-            System.out.println("---------------------------------------------------------------------");
+            System.out.printf("%-36.36s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
+            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
             for (Group g : groups) {
                 System.out.printf(
-                    "%-5s | %-35.35s | %-60.60s%n",
+                    "%-36.36s | %-35.35s | %-60.60s%n",
                     g.id(),
                     g.name(),
                     g.description().orElse("-")
@@ -263,7 +314,6 @@ public class AdressbuchCLI implements Callable<Integer> {
     public static class DeleteGroupCommand implements Callable<Integer> {
         @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
         private String id;
-
         @Override
         public Integer call() {
             boolean deleted = groupService.deleteGroup(id);
@@ -272,6 +322,227 @@ public class AdressbuchCLI implements Callable<Integer> {
             } else {
                 System.out.println("Keine Gruppe mit ID " + id + " gefunden.");
             }
+            return 0;
+        }
+    }
+
+    @Command(name = "update", description = "Gruppe aktualisieren")
+    public static class UpdateGroupCommand implements Callable<Integer> {
+        @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
+        private String id;
+
+        @Option(names = {"-n", "--name"}, description = "Neuer Gruppenname")
+        private String name;
+
+        @Option(names = {"-d", "--description"}, description = "Neue Beschreibung")
+        private String description;
+        
+        @Override
+        public Integer call() {
+            Optional<Group> existingContact = groupService.findGroupById(id);
+
+            if (existingContact.isEmpty()) {
+                System.out.println("Keine Gruppe mit der ID " + id + " gefunden. Aktualisierung abgebrochen.");
+                return 0;
+            }
+
+            Group existing = existingContact.get();
+
+            groupService.updateGroup(
+                id,
+                name != null ? name : existing.name(),
+                description != null ? description : existing.description().orElse(null)
+            );
+
+            System.out.println("Gruppe erfolgreich aktualisiert:");
+            if (name != null) {
+            System.out.println("Name: " + existing.name() + " → " + name);
+            }
+            if (description != null) {
+                System.out.println("Beschreibung: " + existing.description().orElse("-") + " → " + description);
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "search", description = "Gruppe suchen")
+    public static class SearchGroupCommand implements Callable<Integer> {
+        public enum GroupSearchField {
+            name,
+            id
+        }
+
+        @Parameters(index = "0", description = "Suchfeld (name, description, id)")
+        private GroupSearchField field;
+
+        @Parameters(index = "1", description = "Suchbegriff")
+        private String search;
+        
+        @Override
+        public Integer call() {
+            Optional<List<Group>> results = switch (field) {
+                case name -> groupService.findGroupByName(search);
+                case id -> groupService.findGroupById(search).map(List::of);
+            };
+            if (results.isEmpty()) {
+                System.out.println("Keine Gruppe mit dem Suchbegriff " + search + " gefunden.");
+                return 0;
+            }
+            System.out.printf("%-36.36s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
+            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+            for (Group g : results.get()) {
+                System.out.printf(
+                    "%-36.36s | %-35.35s | %-60.60s%n",
+                    g.id(),
+                    g.name(),
+                    g.description().orElse("-")
+                );
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "add-contact-to-group", description = "Kontakt zu Gruppe hinzufügen")
+    public static class AddContactToGroupCommand implements Callable<Integer> {
+        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        private String groupId;
+
+        @Option(names = {"-idContact", "--idContact"}, description = "Kontakt-ID", required = true)
+        private String contactId;
+        
+        @Override
+        public Integer call() {
+            Optional<Group> existingGroup = groupService.findGroupById(groupId);
+            Optional<Contact> existingContact = contactService.findContactById(contactId);
+
+            if (existingGroup.isEmpty()) {
+                System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                return 0;
+            }
+
+            if (existingContact.isEmpty()) {
+                System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+                return 0;
+            }
+            
+            if (contactGroupService.isContactInGroup(contactId, groupId)) {
+                System.out.println("Kontakt ist bereits in der Gruppe.");
+                return 0;
+            }
+            
+            contactGroupService.addContactToGroup(contactId, groupId);
+            System.out.println("Kontakt erfolgreich zur Gruppe hinzugefügt.");
+            return 0;
+        }
+    }
+
+    @Command(name = "is-contact-in-group", description = "Prüft, ob ein Kontakt in einer Gruppe ist")
+    public static class IsContactInGroupCommand implements Callable<Integer> {
+        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        private String groupId;
+
+        @Option(names = {"-idContact", "--idContact"}, description = "Kontakt-ID", required = true)
+        private String contactId;
+        
+        @Override
+        public Integer call() {
+            Optional<Group> existingGroup = groupService.findGroupById(groupId);
+            Optional<Contact> existingContact = contactService.findContactById(contactId);
+
+            if (existingGroup.isEmpty()) {
+                System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                return 0;
+            }
+            if (existingContact.isEmpty()) {
+                System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+                return 0;
+            }
+            
+            if (contactGroupService.isContactInGroup(contactId, groupId)) {
+                System.out.println("Der Kontakt " + existingContact.get().name() + " ist in der angegebenen Gruppe.");
+            } else {
+                System.out.println("Der Kontakt ist nicht in der Gruppe.\n" +
+                "Um einen Kontakt zu einer Gruppe hinzuzufügen, verwenden Sie den Befehl 'add-contact-to-group'.");
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "show-contacts-in-group", description = "Findet alle Kontakte in einer Gruppe")
+    public static class ListContactsInGroupCommand implements Callable<Integer> {
+        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        private String groupId;
+        
+        @Override
+        public Integer call() {
+            List<String> contactIds = contactGroupService.findContactIdsByGroupId(groupId);
+            if (contactIds.isEmpty()) {
+                System.out.println("Keine Kontakte in der Gruppe gefunden.");
+                return 0;
+            } else {
+                Optional<Group> existingGroup = groupService.findGroupById(groupId);
+
+                if (existingGroup.isEmpty()) {
+                    System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                    return 0;
+                }
+
+                List<Contact> results = new ArrayList<>();
+
+                for (String contactId : contactIds) {
+                    contactService.findContactById(contactId)
+                        .ifPresent(results::add);
+                }
+
+                if (results.isEmpty()) {
+                    System.out.println("Keine gültigen Kontakte gefunden.");
+                    return 0;
+                }
+                System.out.printf(
+                    "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                    "ID", "Name", "Telefon", "E-Mail", "Adresse"
+                );
+                System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+                for (Contact c : results) {
+                    System.out.printf(
+                        "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                        c.id(),
+                        c.name(),
+                        c.phoneNumber().orElse("-"),
+                        c.email().orElse("-"),
+                        c.address().orElse("-")
+                    );
+                }
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "remove-contact-from-group", description = "Kontakt von einer Gruppe entfernen")
+    public static class RemoveContactFromGroupCommand implements Callable<Integer> {
+        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        private String groupId;
+
+        @Option(names = {"-idContact", "--idContact"}, description = "Kontakt-ID", required = true)
+        private String contactId;
+        
+        @Override
+        public Integer call() {
+            Optional<Group> existingGroup = groupService.findGroupById(groupId);
+            Optional<Contact> existingContact = contactService.findContactById(contactId);
+
+            if (existingGroup.isEmpty()) {
+                System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                return 0;
+            }
+            if (existingContact.isEmpty()) {
+                System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+                return 0;
+            }
+            contactGroupService.removeContactFromGroup(contactId, groupId);
+            System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
             return 0;
         }
     }

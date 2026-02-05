@@ -59,8 +59,20 @@ public class ContactService {
         return contactRepository.findAll();
     }
 
-    public List<Contact> searchContactsByName(String searchTerm) {
-        return contactRepository.searchByName(searchTerm);
+    public Optional<List<Contact>> findContactsByName(String searchTerm) {
+        return contactRepository.findByName(searchTerm);
+    }
+    
+    public Optional<List<Contact>> findContactsByPhone(String searchTerm) {
+        return contactRepository.findByPhone(searchTerm);
+    }
+
+    public Optional<List<Contact>> findContactsByEmail(String searchTerm) {
+        return contactRepository.findByEmail(searchTerm);
+    }
+
+    public Optional<List<Contact>> findContactsByAddresse(String searchTerm) {
+        return contactRepository.findByAddresse(searchTerm);
     }
 
     public void validateContactName(String name) {

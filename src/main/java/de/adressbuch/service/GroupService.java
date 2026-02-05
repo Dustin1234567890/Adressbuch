@@ -1,11 +1,11 @@
 package de.adressbuch.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import de.adressbuch.models.Group;
 import de.adressbuch.repository.interfaces.GroupRepo;
 import de.adressbuch.util.Utils;
-
-import java.util.List;
-import java.util.Optional;
 
 public class GroupService {
     private final GroupRepo groupRepository;
@@ -48,7 +48,7 @@ public class GroupService {
         return groupRepository.findById(id);
     }
 
-    public Optional<Group> findGroupByName(String name) {
+    public Optional<List<Group>> findGroupByName(String name) {
         return groupRepository.findByName(name);
     }
 

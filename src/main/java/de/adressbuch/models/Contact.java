@@ -3,7 +3,6 @@ package de.adressbuch.models;
 import java.util.Objects;
 import java.util.Optional;
 
-//TODO: refactor to record - JUU 27/01
 public record Contact (
     String id,
     String name,
