@@ -162,7 +162,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
 
             List<Contact> contacts = create.select()
                 .from(table(TABLE_NAME))
-                .where(DSL.lower(field("name", String.class)).eq(search.toLowerCase()))
+                .where(DSL.lower(field("name", String.class)).like("%" + search.toLowerCase() + "%"))
                 .fetch(record -> new Contact(
                         record.get("id", String.class),
                         record.get("name", String.class),
@@ -226,7 +226,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
 
             List<Contact> contacts = create.select()
                     .from(table(TABLE_NAME))
-                    .where(DSL.lower(field("address", String.class)).eq(search.toLowerCase()))
+                    .where(DSL.lower(field("address", String.class)).like("%" + search.toLowerCase() + "%"))
                     .fetch(record -> new Contact(
                             record.get("id", String.class),
                             record.get("name", String.class),

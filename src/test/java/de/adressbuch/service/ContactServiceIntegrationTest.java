@@ -1,21 +1,23 @@
 package de.adressbuch.service;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import de.adressbuch.exception.ContactNotFoundException;
 import de.adressbuch.exception.ValidationException;
 import de.adressbuch.models.Contact;
 import de.adressbuch.repository.SQLiteContactRepo;
 import de.adressbuch.repository.SQLiteGroupRepo;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.io.TempDir;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("ContactService - Integration Tests")
 public class ContactServiceIntegrationTest {
@@ -131,9 +133,9 @@ public class ContactServiceIntegrationTest {
             contactService.addContact("Sample Kontakt 2", "0987654321", null, null);
             
 
-            assertTrue(contactService.findContactsByPhone("0123").isPresent());
-            assertEquals(1, contactService.findContactsByPhone("0123").get().size());
-            assertEquals("Sample Kontakt", contactService.findContactsByPhone("0123").get().get(0).name());
+            assertTrue(contactService.findContactsByPhone("0123456789").isPresent());
+            assertEquals(1, contactService.findContactsByPhone("0123456789").get().size());
+            assertEquals("Sample Kontakt", contactService.findContactsByPhone("0123456789").get().get(0).name());
         }
 
         @Test
@@ -145,8 +147,10 @@ public class ContactServiceIntegrationTest {
             contactService.addContact("Sample Kontakt 3", "354353453", "Testerstrasse 1", "sample3@test.de");
             
 
-            assertTrue(contactService.findContactsByEmail("test").isPresent());
-            assertEquals(2, contactService.findContactsByEmail("test").get().size());
+            assertTrue(contactService.findContactsByEmail("sample@test.de").isPresent());
+            assertTrue(contactService.findContactsByEmail("sample2@test.de").isPresent());
+            assertEquals(1, contactService.findContactsByEmail("sample@test.de").get().size());
+            assertEquals(1, contactService.findContactsByEmail("sample2@test.de").get().size());
         }
 
         @Test
