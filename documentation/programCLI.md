@@ -1,7 +1,7 @@
 # 📒 Adressbuch – CLI & TUI Dokumentation
 
 Willkommen beim **Adressbuch**!  
-Dieses Programm ermöglicht die Verwaltung von **Kontakten** und **Gruppen** über eine **Command Line Interface (CLI)**  
+Dieses Programm ermöglicht die Verwaltung von **Kontakten** und **Gruppen** über eine **Command Line Interface (CLI)**
 
 ## 🆘 Support & Hilfe
 
@@ -12,6 +12,14 @@ Beispiele:
 mvn exec:java "-Dexec.args=--help"
 mvn exec:java "-Dexec.args=group --help"
 mvn exec:java "-Dexec.args=group add --help"
+
+## 📒 Hinweis
+
+Angaben die Leerzeichen beinhalten müssen mit '' ummantelt werden.
+
+Beispiel:
+
+mvn exec:java "-Dexec.args= contact add --name 'Max Mustermann' --phone 0123456789 --address 'Musterstraße 1' --email max@example.de"
 
 ## Versionsinfo
 
@@ -32,7 +40,7 @@ Beispieleingabe:
 
 mvn exec:java "-Dexec.args= contact add --name Max Mustermann"
 
-mvn exec:java "-Dexec.args= contact add --name Max Mustermann --phone 0123456789 --address Musterstraße 1 --email max@example.de"
+mvn exec:java "-Dexec.args= contact add --name 'Max Mustermann' --phone 0123456789 --address 'Musterstraße 1' --email max@example.de"
 
 ### 📋 Kontakte auflisten
 
@@ -58,7 +66,7 @@ Beispiel:
 
 mvn exec:java "-Dexec.args= contact search id 17d4d900-f69a-41df-bcf1-d98a52bd1c7d"
 mvn exec:java "-Dexec.args= contact search name Max"
-mvn exec:java "-Dexec.args= contact search phone +49 12345678"
+mvn exec:java "-Dexec.args= contact search phone '+49 12345678'"
 
 ### ✏️ Kontakt aktualisieren
 
@@ -128,7 +136,7 @@ mvn exec:java "-Dexec.args=group update --id <id> --name <name> --description <d
 
 Beispiel:
 
-mvn exec:java "-Dexec.args=group update --id 4c60309c-0979-4177-a21d-0d71f46135bd --description zusammen für Prog3 lernen"
+mvn exec:java "-Dexec.args=group update --id 4c60309c-0979-4177-a21d-0d71f46135bd --description 'Zusammen für Prog3 lernen'"
 
 ### 🗑️ Gruppe löschen
 

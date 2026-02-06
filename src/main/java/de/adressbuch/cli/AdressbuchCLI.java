@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import de.adressbuch.injection.ServiceFactory;
-import de.adressbuch.injection.DisplayConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.adressbuch.injection.DisplayConstants;
+import de.adressbuch.injection.ServiceFactory;
 import de.adressbuch.models.Contact;
 import de.adressbuch.models.Group;
 import de.adressbuch.service.ContactGroupService;
@@ -63,7 +64,7 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "add", description = "Neuen Kontakt hinzufügen")
+    @Command(name = "add", description = "Neuen Kontakt hinzufuegen")
     public static class AddContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddContactCommand.class);
         private final ContactService contactService;
@@ -91,7 +92,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 logger.info("[CLI] Kontakt addet: {}", name);
                 System.out.println("Kontakt " + name + " wurde erfolgreich angelegt.");
             } catch (Exception e) {
-                logger.error("[CLI] Fehler beim Hinzufügen des Kontakts: {}", e.getMessage());
+                logger.error("[CLI] Fehler beim Hinzufuegen des Kontakts: {}", e.getMessage());
                 System.out.println("Fehler: " + e.getMessage());
             }
             return 0;
@@ -108,7 +109,7 @@ public class AdressbuchCLI implements Callable<Integer> {
             if (contacts.isEmpty()) {
                 System.out.println(
                     "Keine Kontakte vorhanden.\n" +
-                    "Beispiel zum Hinzufügen eines Kontakts:\n" +
+                    "Beispiel zum Hinzufuegen eines Kontakts:\n" +
                     "add --name <Name> --phone <Telefonnummer> --address <Adresse> --email <E-Mail>"
                 );
                 return 0;
@@ -232,22 +233,22 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             System.out.println("Kontakt erfolgreich aktualisiert:");
             if (name != null) {
-            System.out.println("Name: " + existing.name() + " → " + name);
+            System.out.println("Name: " + existing.name() + " -> " + name);
             }
             if (phone != null) {
-                System.out.println("Telefon: " + existing.phoneNumber().orElse("-") + " → " + phone);
+                System.out.println("Telefon: " + existing.phoneNumber().orElse("-") + " -> " + phone);
             }
             if (email != null) {
-                System.out.println("E-Mail: " + existing.email().orElse("-") + " → " + email);
+                System.out.println("E-Mail: " + existing.email().orElse("-") + " -> " + email);
             }
             if (address != null) {
-                System.out.println("Adresse: " + existing.address().orElse("-") + " → " + address);
+                System.out.println("Adresse: " + existing.address().orElse("-") + " -> " + address);
             }
             return 0;
         }
     }
 
-    @Command(name = "delete", description = "Kontakt löschen")
+    @Command(name = "delete", description = "Kontakt loeschen")
     public static class DeleteContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(DeleteContactCommand.class);
         @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
@@ -256,10 +257,10 @@ public class AdressbuchCLI implements Callable<Integer> {
         public Integer call() {
             try {
                 contactService.deleteContact(id);
-                logger.info("[CLI] Kontakt gelöscht: {}", id);
-                System.out.println("Kontakt mit ID " + id + " wurde erfolgreich gelöscht.");
+                logger.info("[CLI] Kontakt geloescht: {}", id);
+                System.out.println("Kontakt mit ID " + id + " wurde erfolgreich geloescht.");
             } catch (Exception e) {
-                logger.warn("[CLI] Kontakt zum Löschen nicht gefunden: {}", id);
+                logger.warn("[CLI] Kontakt zum Loeschen nicht gefunden: {}", id);
                 System.out.println("Kein Kontakt mit ID " + id + " gefunden.");
             }
             return 0;
@@ -286,7 +287,7 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "add", description = "Neue Gruppe hinzufügen")
+    @Command(name = "add", description = "Neue Gruppe hinzufuegen")
     public static class AddGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddGroupCommand.class);
         @Option(names = {"-n", "--name"}, description = "Gruppenname", required = true)
@@ -318,7 +319,7 @@ public class AdressbuchCLI implements Callable<Integer> {
             if (groups.isEmpty()) {
                 System.out.println(
                     "Keine Gruppen vorhanden.\n" +
-                    "Du kannst eine neue Gruppe hinzufügen mit:\n" +
+                    "Du kannst eine neue Gruppe hinzufuegen mit:\n" +
                     "add --name <Gruppenname> --description <Beschreibung>"
                 );
                 return 0;
@@ -339,7 +340,7 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "delete", description = "Gruppe löschen")
+    @Command(name = "delete", description = "Gruppe loeschen")
     public static class DeleteGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(DeleteGroupCommand.class);
         @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
@@ -348,10 +349,10 @@ public class AdressbuchCLI implements Callable<Integer> {
         public Integer call() {
             try {
                 groupService.deleteGroup(id);
-                logger.info("[CLI] Gruppe gelöscht: {}", id);
-                System.out.println("Gruppe mit ID " + id + " wurde erfolgreich gelöscht.");
+                logger.info("[CLI] Gruppe geloescht: {}", id);
+                System.out.println("Gruppe mit ID " + id + " wurde erfolgreich geloescht.");
             } catch (IllegalArgumentException e) {
-                logger.warn("[CLI] Gruppe zum Löschen nicht gefunden: {}", id);
+                logger.warn("[CLI] Gruppe zum Loeschen nicht gefunden: {}", id);
                 System.out.println("Keine Gruppe mit ID " + id + " gefunden.");
             }
             return 0;
@@ -391,10 +392,10 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             System.out.println("Gruppe erfolgreich aktualisiert:");
             if (name != null) {
-            System.out.println("Name: " + existing.name() + " → " + name);
+            System.out.println("Name: " + existing.name() + " -> " + name);
             }
             if (description != null) {
-                System.out.println("Beschreibung: " + existing.description().orElse("-") + " → " + description);
+                System.out.println("Beschreibung: " + existing.description().orElse("-") + " -> " + description);
             }
             return 0;
         }
@@ -440,7 +441,7 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "add-contact-to-group", description = "Kontakt zu Gruppe hinzufügen")
+    @Command(name = "add-contact-to-group", description = "Kontakt zu Gruppe hinzufuegen")
     public static class AddContactToGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddContactToGroupCommand.class);
         @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
@@ -455,13 +456,13 @@ public class AdressbuchCLI implements Callable<Integer> {
             Optional<Contact> existingContact = contactService.findContactById(contactId);
 
             if (existingGroup.isEmpty()) {
-                logger.warn("[CLI] Gruppe nicht gefunden beim Hinzufügen: {}", groupId);
+                logger.warn("[CLI] Gruppe nicht gefunden beim Hinzufuegen: {}", groupId);
                 System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
                 return 0;
             }
 
             if (existingContact.isEmpty()) {
-                logger.warn("[CLI] Kontakt nicht gefunden beim Hinzufügen: {}", contactId);
+                logger.warn("[CLI] Kontakt nicht gefunden beim Hinzufuegen: {}", contactId);
                 System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
                 return 0;
             }
@@ -474,12 +475,12 @@ public class AdressbuchCLI implements Callable<Integer> {
             
             contactGroupService.addContactToGroup(contactId, groupId);
             logger.info("[CLI] Kontakt zu Gruppe geaddet: {}/{}", contactId, groupId);
-            System.out.println("Kontakt erfolgreich zur Gruppe hinzugefügt.");
+            System.out.println("Kontakt erfolgreich zur Gruppe hinzugefuegt.");
             return 0;
         }
     }
 
-    @Command(name = "is-contact-in-group", description = "Prüft, ob ein Kontakt in einer Gruppe ist")
+    @Command(name = "is-contact-in-group", description = "Prueft, ob ein Kontakt in einer Gruppe ist")
     public static class IsContactInGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(IsContactInGroupCommand.class);
         @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
@@ -510,7 +511,7 @@ public class AdressbuchCLI implements Callable<Integer> {
             } else {
                 logger.debug("[CLI] Kontakt ist nicht in Gruppe: {}/{}", contactId, groupId);
                 System.out.println("Der Kontakt ist nicht in der Gruppe.\n" +
-                "Um einen Kontakt zu einer Gruppe hinzuzufügen, verwenden Sie den Befehl 'add-contact-to-group'.");
+                "Um einen Kontakt zu einer Gruppe hinzuzufuegen, verwenden Sie den Befehl 'add-contact-to-group'.");
             }
             return 0;
         }
@@ -546,7 +547,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 }
 
                 if (results.isEmpty()) {
-                    System.out.println("Keine gültigen Kontakte gefunden.");
+                    System.out.println("Keine gueltigen Kontakte gefunden.");
                     return 0;
                 }
                 System.out.printf(
