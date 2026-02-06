@@ -76,6 +76,7 @@ src/test/java/de/adressbuch/
 - **Best Practices**:
   - `Optional<T>` für sichere Null-Behandlung
   - Custom Exceptions werfen, nicht `RuntimeException`
+  - Records für leicht zu generierenden boiler plate code unserer unveränderlichen Klassen
 
 ### 3. Persistierungs-Schicht (Repository)
 **Klassen**: `SQLiteContactRepo`, `SQLiteGroupRepo`, `SQLiteContactGroupRepo`

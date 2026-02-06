@@ -63,7 +63,7 @@ unseren agilen Prozess, die Herausforderungen mit Ultra-Short-Sprints und unsere
 - *Scope Reduction*
 
 **4: Asynchrone Dokumentation**
-- Notizen fpr Dokumentation parallel zu Code, nicht nach
+- Notizen für Dokumentation parallel zu Code, nicht nach
 - ARCHITECTURE.md wird danach mit der Vorarbeit kreiert
 
 ## Retro der 15-Tage
