@@ -2,6 +2,9 @@ package de.adressbuch.service;
 
 import java.util.List;
 
+import de.adressbuch.exception.ContactNotFoundException;
+import de.adressbuch.exception.GroupNotFoundException;
+import de.adressbuch.exception.ValidationException;
 import de.adressbuch.repository.interfaces.ContactGroupRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +21,15 @@ public class ContactGroupService {
         this.contactService = contactService;
     }
 
-    public void addContactToGroup(String contactId, String groupId) {
+    public void addContactToGroup(String contactId, String groupId) throws ContactNotFoundException, GroupNotFoundException {
+        if (contactService.findContactById(contactId).isEmpty()) {
+            throw new ContactNotFoundException("Kontakt mit ID " + contactId + " nicht gefunden");
+        }
+        
+        if (groupService.findGroupById(groupId).isEmpty()) {
+            throw new GroupNotFoundException("Gruppe mit ID " + groupId + " nicht gefunden");
+        }
+        
         contactGroupRepository.addContactToGroup(contactId, groupId);
         logger.info("Kontakt {} zu Gruppe {} geaddet", contactId, groupId);
     }
@@ -35,7 +46,12 @@ public class ContactGroupService {
         return contactIds;
     }
 
-    public void removeContactFromGroup(String contactId, String groupId) {
+    public void removeContactFromGroup(String contactId, String groupId) throws ValidationException {
+
+        if (!isContactInGroup(contactId, groupId)) {
+            throw new ValidationException("Kontakt " + contactId + " ist nicht in Gruppe " + groupId + " vorhanden");
+        }
+        
         contactGroupRepository.removeContactFromGroup(contactId, groupId);
         logger.info("Kontakt {} von Gruppe {} entfernt", contactId, groupId);
     }

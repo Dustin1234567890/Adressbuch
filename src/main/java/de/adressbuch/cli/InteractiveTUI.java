@@ -8,6 +8,9 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.adressbuch.exception.ContactNotFoundException;
+import de.adressbuch.exception.GroupNotFoundException;
+import de.adressbuch.exception.ValidationException;
 import de.adressbuch.injection.DisplayConstants;
 import de.adressbuch.injection.ServiceFactory;
 import de.adressbuch.models.Contact;
@@ -531,9 +534,14 @@ public class InteractiveTUI {
             return;
         }
 
-        contactGroupService.addContactToGroup(contactId, groupId);
-        logger.info("[TUI] Kontakt zu Gruppe geaddet: {}/{}", contactId, groupId);
-        System.out.println("Kontakt wurde zur Gruppe hinzugefuegt.");
+        try {
+            contactGroupService.addContactToGroup(contactId, groupId);
+            logger.info("[TUI] Kontakt zu Gruppe geaddet: {}/{}", contactId, groupId);
+            System.out.println("Kontakt wurde zur Gruppe hinzugefuegt.");
+        } catch (ContactNotFoundException | GroupNotFoundException e) {
+            logger.warn("[TUI] Fehler beim Hinzufuegen: {}", e.getMessage());
+            System.out.println("Fehler: " + e.getMessage());
+        }
     }
 
     private void showContactsInGroup() {
@@ -634,9 +642,14 @@ public class InteractiveTUI {
         }
 
         if (contactGroupService.isContactInGroup(contactId, groupId)) {
-            contactGroupService.removeContactFromGroup(contactId, groupId);
-            logger.info("[TUI] Kontakt entfernt aus Gruppe: {}/{}", contactId, groupId);
-            System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
+            try {
+                contactGroupService.removeContactFromGroup(contactId, groupId);
+                logger.info("[TUI] Kontakt entfernt aus Gruppe: {}/{}", contactId, groupId);
+                System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
+            } catch (ValidationException e) {
+                logger.warn("[TUI] Fehler beim Entfernen: {}", e.getMessage());
+                System.out.println("Fehler: " + e.getMessage());
+            }
         } else {
             logger.debug("[TUI] Kontakt war nicht in Gruppe: {}/{}", contactId, groupId);
             System.out.println("Der Kontakt war nicht in der Gruppe oder es gab ein Problem beim Entfernen.");

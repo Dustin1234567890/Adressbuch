@@ -8,6 +8,9 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.adressbuch.exception.ContactNotFoundException;
+import de.adressbuch.exception.GroupNotFoundException;
+import de.adressbuch.exception.ValidationException;
 import de.adressbuch.injection.DisplayConstants;
 import de.adressbuch.injection.ServiceFactory;
 import de.adressbuch.models.Contact;
@@ -574,9 +577,14 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
             
-            contactGroupService.addContactToGroup(contactId, groupId);
-            logger.info("[CLI] Kontakt zu Gruppe geaddet: {}/{}", contactId, groupId);
-            System.out.println("Kontakt erfolgreich zur Gruppe hinzugefuegt.");
+            try {
+                contactGroupService.addContactToGroup(contactId, groupId);
+                logger.info("[CLI] Kontakt zu Gruppe geaddet: {}/{}", contactId, groupId);
+                System.out.println("Kontakt erfolgreich zur Gruppe hinzugefuegt.");
+            } catch (ContactNotFoundException | GroupNotFoundException e) {
+                logger.warn("[CLI] Fehler beim Hinzufuegen: {}", e.getMessage());
+                System.out.println("Fehler: " + e.getMessage());
+            }
             return 0;
         }
     }
@@ -717,9 +725,14 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
                 return 0;
             }
-            contactGroupService.removeContactFromGroup(contactId, groupId);
-            logger.info("[CLI] Kontakt entfernt aus Gruppe: {}/{}", contactId, groupId);
-            System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
+            try {
+                contactGroupService.removeContactFromGroup(contactId, groupId);
+                logger.info("[CLI] Kontakt entfernt aus Gruppe: {}/{}", contactId, groupId);
+                System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
+            } catch (ValidationException e) {
+                logger.warn("[CLI] Fehler beim Entfernen: {}", e.getMessage());
+                System.out.println("Fehler: " + e.getMessage());
+            }
             return 0;
         }
     }
