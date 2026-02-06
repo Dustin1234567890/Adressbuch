@@ -87,7 +87,7 @@ public class AdressbuchCLI implements Callable<Integer> {
 
         @Option(
             names = {"-n", "--name"},
-            description = "Kontaktname (Pflichtfeld)",
+            paramLabel = "<NAME>",
             required = true
         )
         private String name;
@@ -241,7 +241,11 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class UpdateContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(UpdateContactCommand.class);
-        @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
+        @Option(
+            names = {"-id", "--id"},
+            paramLabel = "<KONTAKT-ID>",
+            required = true
+        )
         private String id;
 
         @Option(names = {"-n", "--name"}, description = "Neuer Name")
@@ -310,7 +314,11 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class DeleteContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(DeleteContactCommand.class);
-        @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
+        @Option(
+            names = {"-id", "--id"},
+            paramLabel = "<KONTAKT-ID>",
+            required = true
+        )
         private String id;
         @Override
         public Integer call() {
@@ -357,7 +365,11 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class AddGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddGroupCommand.class);
-        @Option(names = {"-n", "--name"}, description = "Gruppenname", required = true)
+        @Option(
+            names = {"-n", "--name"},
+            paramLabel = "<NAME>",
+            required = true
+        )
         private String name;
 
         @Option(names = {"-d", "--description"}, description = "Beschreibung")
@@ -424,7 +436,11 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class DeleteGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(DeleteGroupCommand.class);
-        @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
+        @Option(
+            names = {"-id", "--id"},
+            paramLabel = "<GRUPPEN-ID>",
+            required = true
+        )
         private String id;
         @Override
         public Integer call() {
@@ -451,7 +467,11 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class UpdateGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(UpdateGroupCommand.class);
-        @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
+        @Option(
+            names = {"-id", "--id"},
+            paramLabel = "<GRUPPEN-ID>",
+            required = true
+        )
         private String id;
 
         @Option(names = {"-n", "--name"}, description = "Neuer Gruppenname")
@@ -548,10 +568,18 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class AddContactToGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddContactToGroupCommand.class);
-        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        @Option(
+            names = {"-idGroup", "--idGroup"},
+            paramLabel = "<GRUPPEN-ID>",
+            required = true
+        )
         private String groupId;
 
-        @Option(names = {"-idContact", "--idContact"}, description = "Kontakt-ID", required = true)
+        @Option(
+            names = {"-idContact", "--idContact"},
+            paramLabel = "<KONTAKT-ID>",
+            required = true
+        )
         private String contactId;
         
         @Override
@@ -599,10 +627,18 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class IsContactInGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(IsContactInGroupCommand.class);
-        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        @Option(
+            names = {"-idGroup", "--idGroup"},
+            paramLabel = "<GRUPPEN-ID>",
+            required = true
+        )
         private String groupId;
 
-        @Option(names = {"-idContact", "--idContact"}, description = "Kontakt-ID", required = true)
+        @Option(
+            names = {"-idContact", "--idContact"},
+            paramLabel = "<KONTAKT-ID>",
+            required = true
+        )
         private String contactId;
         
         @Override
@@ -643,7 +679,11 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class ListContactsInGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(ListContactsInGroupCommand.class);
-        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        @Option(
+            names = {"-idGroup", "--idGroup"},
+            paramLabel = "<GRUPPEN-ID>",
+            required = true
+        )
         private String groupId;
         
         @Override
@@ -704,10 +744,18 @@ public class AdressbuchCLI implements Callable<Integer> {
     )
     public static class RemoveContactFromGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(RemoveContactFromGroupCommand.class);
-        @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
+        @Option(
+            names = {"-idGroup", "--idGroup"},
+            paramLabel = "<GRUPPEN-ID>",
+            required = true
+        )
         private String groupId;
 
-        @Option(names = {"-idContact", "--idContact"}, description = "Kontakt-ID", required = true)
+        @Option(
+            names = {"-idContact", "--idContact"},
+            paramLabel = "<KONTAKT-ID>",
+            required = true
+        )
         private String contactId;
         
         @Override
