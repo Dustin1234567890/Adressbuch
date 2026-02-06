@@ -161,8 +161,8 @@ public class InteractiveTUI {
             System.out.println("Telefon : " + phone);
             System.out.println("Adresse : " + adresse);
             System.out.println("E-Mail  : " + email);
-        } catch (Exception e) {
-            logger.error("[TUI] Fehler beim Hinzufuegen des Kontakts: {}", e.getMessage());
+        } catch (ValidationException e) {
+            logger.error("[TUI] Validierungsfehler beim Hinzufuegen des Kontakts: {}", e.getMessage());
             System.out.println("Fehler: " + e.getMessage());
         }
     }
@@ -213,7 +213,7 @@ public class InteractiveTUI {
             contactService.updateContact(id, name, phone, adresse, email);
             logger.info("[TUI] Kontakt geupdatet: {}", id);
             System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
-        } catch (Exception e) {
+        } catch (ValidationException | ContactNotFoundException e) {
             logger.error("[TUI] Fehler beim Aktualisieren des Kontakts: {}", e.getMessage());
             System.out.println("Fehler: " + e.getMessage());
         }
@@ -285,7 +285,7 @@ public class InteractiveTUI {
         String id;
         String response;
 
-        System.out.println();
+        
         System.out.println("=== Kontakt loeschen ===");
 
         System.out.println("Bitte geben Sie die Kontakt-ID ein: ");
@@ -299,7 +299,7 @@ public class InteractiveTUI {
                 contactService.deleteContact(id);
                 logger.info("[TUI] Kontakt geloescht: {}", id);
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich geloescht.");
-            } catch (Exception e) {
+            } catch (ContactNotFoundException e) {
                 logger.warn("[TUI] Kontakt zum Loeschen nicht gefunden: {}", id);
                 System.out.println("Keinen Kontakt mit ID " + id + " gefunden.");
             }
@@ -371,7 +371,7 @@ public class InteractiveTUI {
     }
 
     private void createGroup() {
-        System.out.println();
+        
         System.out.println("=== Neue Gruppe erstellen ===");
 
         System.out.print("Gruppenname   : ");
@@ -388,7 +388,7 @@ public class InteractiveTUI {
         groupService.addGroup(name, desc);
         logger.info("[TUI] Gruppe geaddet: {}", name);
 
-        System.out.println();
+        
         System.out.println("Gruppe erfolgreich angelegt");
         System.out.println("-----------------------------");
         System.out.println("Name          : " + name);
@@ -443,7 +443,7 @@ public class InteractiveTUI {
         String id;
         String response;
 
-        System.out.println();
+        
         System.out.println("=== Gruppe loeschen ===");
 
         System.out.println("Bitte geben Sie die Gruppen-ID ein: ");
@@ -471,7 +471,7 @@ public class InteractiveTUI {
     }
 
     private void updateGroup() {
-        System.out.println();
+        
         System.out.println("=== Gruppe aktualisieren ===");
 
         System.out.print("Gruppen-ID eingeben: ");

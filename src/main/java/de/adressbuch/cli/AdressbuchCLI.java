@@ -116,9 +116,9 @@ public class AdressbuchCLI implements Callable<Integer> {
                 contactService.addContact(name, phone, address, email);
                 logger.info("[CLI] Kontakt addet: {}", name);
                 System.out.println("Kontakt " + name + " wurde erfolgreich angelegt.");
-            } catch (Exception e) {
-                logger.error("[CLI] Fehler beim Hinzufuegen des Kontakts: {}", e.getMessage());
-                System.err.println("Fehler: " + e.getMessage());
+            } catch (ValidationException e) {
+                logger.error("[CLI] Validierungsfehler beim Hinzufuegen des Kontakts: {}", e.getMessage());
+                System.err.println("Validierungsfehler: " + e.getMessage());
             }
             return 0;
         }
@@ -282,9 +282,12 @@ public class AdressbuchCLI implements Callable<Integer> {
                 );
                 logger.info("[CLI] Kontakt geupdatet: {}", id);
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
-            } catch (Exception e) {
-                logger.error("[CLI] Fehler beim Aktualisieren des Kontakts: {}", e.getMessage());
+            } catch (ContactNotFoundException e) {
+                logger.error("[CLI] Kontakt nicht gefunden: {}", e.getMessage());
                 System.err.println("Fehler: " + e.getMessage());
+            } catch (ValidationException e) {
+                logger.error("[CLI] Validierungsfehler beim Aktualisieren: {}", e.getMessage());
+                System.err.println("Validierungsfehler: " + e.getMessage());
             }
 
             System.out.println("Kontakt erfolgreich aktualisiert:");
@@ -326,7 +329,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 contactService.deleteContact(id);
                 logger.info("[CLI] Kontakt geloescht: {}", id);
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich geloescht.");
-            } catch (Exception e) {
+            } catch (ContactNotFoundException e) {
                 logger.warn("[CLI] Kontakt zum Loeschen nicht gefunden: {}", id);
                 System.err.println("Kein Kontakt mit ID " + id + " gefunden.");
             }

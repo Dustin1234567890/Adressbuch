@@ -1,5 +1,6 @@
 package de.adressbuch.repository;
 
+import de.adressbuch.exception.RepositoryException;
 import java.util.List;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,7 +41,7 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
             logger.debug("Contact-Group Tabelle init");
         } catch (SQLException e) {
             logger.error("Fehler beim Init der Contact-Group Tabelle", e);
-            throw new RuntimeException("Fehler beim Init der Contact-Group Tabelle", e);
+            throw new RepositoryException("Fehler beim Init der Contact-Group Tabelle", e);
         }
     }
 
@@ -56,7 +57,7 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
             logger.debug("Kontakt {} zu Gruppe {} geaddet", contactId, groupId);
         } catch (SQLException e) {
             logger.error("Fehler beim Adden des Kontakts zu Gruppe: {} / {}", contactId, groupId, e);
-            throw new RuntimeException("Fehler beim Adden des Kontakts zu Gruppe", e);
+            throw new RepositoryException("Fehler beim Adden des Kontakts zu Gruppe", e);
         }
     }
 
@@ -71,7 +72,7 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
             logger.debug("Kontakt {} von Gruppe {} entfernt", contactId, groupId);
         } catch (SQLException e) {
             logger.error("Fehler beim Entfernen des Kontakts von Gruppe: {} / {}", contactId, groupId, e);
-            throw new RuntimeException("Fehler beim Entfernen des Kontakts von Gruppe", e);
+            throw new RepositoryException("Fehler beim Entfernen des Kontakts von Gruppe", e);
         }
     }
 
@@ -88,7 +89,7 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
             return contactIds;
         } catch (SQLException e) {
             logger.error("Fehler beim Finden der Kontakte in Gruppe: {}", groupId, e);
-            throw new RuntimeException("Fehler beim Finden der Kontakte in Gruppe", e);
+            throw new RepositoryException("Fehler beim Finden der Kontakte in Gruppe", e);
         }
     }
 
@@ -107,7 +108,7 @@ public class SQLiteContactGroupRepo implements ContactGroupRepo {
             return foundContactCheck;
         } catch (SQLException e) {
             logger.error("Fehler beim Prüfen des Kontakts in Gruppe: {} / {}", contactId, groupId, e);
-            throw new RuntimeException("Fehler beim Prüfen des Kontakts in Gruppe", e);
+            throw new RepositoryException("Fehler beim Prüfen des Kontakts in Gruppe", e);
         }
     }
 }

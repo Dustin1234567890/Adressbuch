@@ -1,5 +1,6 @@
 package de.adressbuch.repository;
 
+import de.adressbuch.exception.RepositoryException;
 import de.adressbuch.models.Group;
 import de.adressbuch.util.Utils;
 import java.util.List;
@@ -40,7 +41,7 @@ public class SQLiteGroupRepo implements GroupRepo {
                 .constraint(primaryKey(field("id")))
                 .execute();
         } catch (SQLException e) {
-            throw new RuntimeException("error db init", e);
+            throw new RepositoryException("error db init", e);
         }
     }
 
@@ -56,7 +57,7 @@ public class SQLiteGroupRepo implements GroupRepo {
 
             return group;
         } catch (SQLException e) {
-            throw new RuntimeException("error saving group", e);
+            throw new RepositoryException("error saving group", e);
         }
     }
 
@@ -73,7 +74,7 @@ public class SQLiteGroupRepo implements GroupRepo {
 
             return group;
         } catch (SQLException e) {
-            throw new RuntimeException("error updating group", e);
+            throw new RepositoryException("error updating group", e);
         }
     }
 
@@ -103,7 +104,7 @@ public class SQLiteGroupRepo implements GroupRepo {
 
             return Optional.of(group);
         } catch (SQLException e) {
-            throw new RuntimeException("error deleting group by id", e);
+            throw new RepositoryException("error deleting group by id", e);
         }
     }
 
@@ -129,7 +130,7 @@ public class SQLiteGroupRepo implements GroupRepo {
 
             return Optional.of(group);
         } catch (SQLException e) {
-            throw new RuntimeException("error finding group by id", e);
+            throw new RepositoryException("error finding group by id", e);
         }
     }
 
@@ -153,7 +154,7 @@ public class SQLiteGroupRepo implements GroupRepo {
 
             return Optional.of(groups);
         } catch (SQLException e) {
-            throw new RuntimeException("error finding group by name", e);
+            throw new RepositoryException("error finding group by name", e);
         }
     }
 
@@ -170,7 +171,7 @@ public class SQLiteGroupRepo implements GroupRepo {
                     Utils.convertToOptionalNonBlank(record.get("description", String.class))
                 ));
         } catch (SQLException e) {
-            throw new RuntimeException("error finding list of all groups", e);
+            throw new RepositoryException("error finding list of all groups", e);
         }
     }
 }

@@ -24,6 +24,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
 
     public SQLiteContactRepo(String dbUrl) {
         this.dbUrl = dbUrl;
+        initializeDatabase();
     }
 
     private Connection getConnection() throws SQLException {
@@ -193,7 +194,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                     ));
             return Optional.of(contacts);
         } catch (SQLException e) {
-            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
+            throw new RepositoryException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
         }
     }
 
@@ -215,7 +216,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                     ));
             return Optional.of(contacts);
         } catch (SQLException e) {
-            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
+            throw new RepositoryException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
         }
     }
 
@@ -236,7 +237,7 @@ public class SQLiteContactRepo implements de.adressbuch.repository.interfaces.Co
                     ));
             return Optional.of(contacts);
         } catch (SQLException e) {
-            throw new RuntimeException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
+            throw new RepositoryException("Fehler beim Suchen von Kontakten mit Begriff: " + search, e);
         }
     }
 }
