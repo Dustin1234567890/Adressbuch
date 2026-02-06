@@ -1,5 +1,7 @@
 # Adressbuch
 
+**Note**: Unter /documentation/ sind restliche Dokumentationen zu finden, welche lesenswert sind.
+
 Ein digitales Adressbuch zur Verwaltung von Kontakten und Gruppen.
 
 1. Entitäten:
