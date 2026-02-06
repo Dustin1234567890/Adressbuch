@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import de.adressbuch.injection.ServiceFactory;
+import de.adressbuch.injection.DisplayConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.adressbuch.models.Contact;
@@ -114,14 +115,14 @@ public class AdressbuchCLI implements Callable<Integer> {
             }
             
             System.out.printf(
-                    "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                    DisplayConstants.CONTACT_HEADER_FORMAT,
                     "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
-            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.out.println(DisplayConstants.SEPARATOR);
 
             for (Contact c : contacts) {
                 System.out.printf(
-                    "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                    DisplayConstants.CONTACT_ROW_FORMAT,
                     c.id(),
                     c.name(),
                     c.phoneNumber().orElse("-"),
@@ -165,14 +166,14 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
             System.out.printf(
-                "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                DisplayConstants.CONTACT_HEADER_FORMAT,
                 "ID", "Name", "Telefon", "E-Mail", "Adresse"
             );
-            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.out.println(DisplayConstants.SEPARATOR);
 
             for (Contact c : results.get()) {
                 System.out.printf(
-                        "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                        DisplayConstants.CONTACT_ROW_FORMAT,
                         c.id(),
                         c.name(),
                         c.phoneNumber().orElse("-"),
@@ -323,12 +324,12 @@ public class AdressbuchCLI implements Callable<Integer> {
                 return 0;
             }
 
-            System.out.printf("%-36.36s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
-            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.out.printf(DisplayConstants.GROUP_HEADER_FORMAT, "ID", "Name", "Beschreibung");
+            System.out.println(DisplayConstants.SEPARATOR);
 
             for (Group g : groups) {
                 System.out.printf(
-                    "%-36.36s | %-35.35s | %-60.60s%n",
+                    DisplayConstants.GROUP_ROW_FORMAT,
                     g.id(),
                     g.name(),
                     g.description().orElse("-")
@@ -424,12 +425,12 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Keine Gruppe mit dem Suchbegriff " + search + " gefunden.");
                 return 0;
             }
-            System.out.printf("%-36.36s | %-35.35s | %-60.60s%n", "ID", "Name", "Beschreibung");
-            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.out.printf(DisplayConstants.GROUP_HEADER_FORMAT, "ID", "Name", "Beschreibung");
+            System.out.println(DisplayConstants.SEPARATOR);
 
             for (Group g : results.get()) {
                 System.out.printf(
-                    "%-36.36s | %-35.35s | %-60.60s%n",
+                    DisplayConstants.GROUP_ROW_FORMAT,
                     g.id(),
                     g.name(),
                     g.description().orElse("-")
@@ -549,14 +550,14 @@ public class AdressbuchCLI implements Callable<Integer> {
                     return 0;
                 }
                 System.out.printf(
-                    "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                    DisplayConstants.CONTACT_HEADER_FORMAT,
                     "ID", "Name", "Telefon", "E-Mail", "Adresse"
                 );
-                System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                System.out.println(DisplayConstants.SEPARATOR);
 
                 for (Contact c : results) {
                     System.out.printf(
-                        "%-36.36s | %-35.35s | %-15.15s | %-35.35s | %-50.50s%n",
+                        DisplayConstants.CONTACT_ROW_FORMAT,
                         c.id(),
                         c.name(),
                         c.phoneNumber().orElse("-"),

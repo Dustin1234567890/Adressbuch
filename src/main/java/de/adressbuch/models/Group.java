@@ -10,8 +10,7 @@ public record Group (
 ) {
     
     public Group {
-        Objects.requireNonNull(name, "Name is not allowed to be null");
-        Objects.requireNonNull(description, "Description is not allowed to be null");
+        Objects.requireNonNull(name, "Name should never be null!");
     }
 
     public Group withId(String i) {

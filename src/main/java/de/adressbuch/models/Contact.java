@@ -11,10 +11,7 @@ public record Contact (
     Optional<String> email
 ) {
     public Contact {
-        Objects.requireNonNull(name, "Name not all");
-        Objects.requireNonNull(phoneNumber, "Phone Number not all");
-        Objects.requireNonNull(address, "Address not all");
-        Objects.requireNonNull(email, "Email not all");
+        Objects.requireNonNull(name, "Name should never be null!");
     }
 
     public Contact withId(String newId) {
