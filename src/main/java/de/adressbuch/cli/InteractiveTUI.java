@@ -147,14 +147,19 @@ public class InteractiveTUI {
         System.out.print("E-Mail    : ");
         String email = scanner.nextLine();
 
-        contactService.addContact(name, phone, adresse, email);
-        logger.info("[TUI] Kontakt geaddet: {}", name);
+        try {
+            contactService.addContact(name, phone, adresse, email);
+            logger.info("[TUI] Kontakt geaddet: {}", name);
 
-        System.out.println("Kontakt hinzugefügt:");
-        System.out.println("Name    : " + name);
-        System.out.println("Telefon : " + phone);
-        System.out.println("Adresse : " + adresse);
-        System.out.println("E-Mail  : " + email);
+            System.out.println("Kontakt hinzugefügt:");
+            System.out.println("Name    : " + name);
+            System.out.println("Telefon : " + phone);
+            System.out.println("Adresse : " + adresse);
+            System.out.println("E-Mail  : " + email);
+        } catch (Exception e) {
+            logger.error("[TUI] Fehler beim Hinzufügen des Kontakts: {}", e.getMessage());
+            System.out.println("Fehler: " + e.getMessage());
+        }
     }
 
     private void updateContact() {
@@ -199,10 +204,14 @@ public class InteractiveTUI {
             email = existing.email().orElse("");
         }
 
-        contactService.updateContact(id, name, phone, adresse, email);
-        logger.info("[TUI] Kontakt geupdatet: {}", id);
-
-        System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
+        try {
+            contactService.updateContact(id, name, phone, adresse, email);
+            logger.info("[TUI] Kontakt geupdatet: {}", id);
+            System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
+        } catch (Exception e) {
+            logger.error("[TUI] Fehler beim Aktualisieren des Kontakts: {}", e.getMessage());
+            System.out.println("Fehler: " + e.getMessage());
+        }
     }
 
     private void searchContacts() {
@@ -285,7 +294,7 @@ public class InteractiveTUI {
                 contactService.deleteContact(id);
                 logger.info("[TUI] Kontakt gelöscht: {}", id);
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich gelöscht.");
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 logger.warn("[TUI] Kontakt zum Löschen nicht gefunden: {}", id);
                 System.out.println("Keinen Kontakt mit ID " + id + " gefunden.");
             }

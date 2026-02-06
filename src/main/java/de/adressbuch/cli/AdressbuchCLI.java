@@ -85,9 +85,14 @@ public class AdressbuchCLI implements Callable<Integer> {
 
         @Override
         public Integer call() {
-            contactService.addContact(name, phone, address, email);
-            logger.info("[CLI] Kontakt addet: {}", name);
-            System.out.println("Kontakt " + name + " wurde erfolgreich angelegt.");
+            try {
+                contactService.addContact(name, phone, address, email);
+                logger.info("[CLI] Kontakt addet: {}", name);
+                System.out.println("Kontakt " + name + " wurde erfolgreich angelegt.");
+            } catch (Exception e) {
+                logger.error("[CLI] Fehler beim Hinzufügen des Kontakts: {}", e.getMessage());
+                System.out.println("Fehler: " + e.getMessage());
+            }
             return 0;
         }
     }
@@ -209,14 +214,20 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             Contact existing = existingContact.get();
 
-            contactService.updateContact(
-                id,
-                name != null ? name : existing.name(),
-                phone != null ? phone : existing.phoneNumber().orElse(null),
-                address != null ? address : existing.address().orElse(null),
-                email != null ? email : existing.email().orElse(null)
-            );
-            logger.info("[CLI] Kontakt geupdatet: {}", id);
+            try {
+                contactService.updateContact(
+                    id,
+                    name != null ? name : existing.name(),
+                    phone != null ? phone : existing.phoneNumber().orElse(null),
+                    address != null ? address : existing.address().orElse(null),
+                    email != null ? email : existing.email().orElse(null)
+                );
+                logger.info("[CLI] Kontakt geupdatet: {}", id);
+                System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
+            } catch (Exception e) {
+                logger.error("[CLI] Fehler beim Aktualisieren des Kontakts: {}", e.getMessage());
+                System.out.println("Fehler: " + e.getMessage());
+            }
 
             System.out.println("Kontakt erfolgreich aktualisiert:");
             if (name != null) {
@@ -246,7 +257,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 contactService.deleteContact(id);
                 logger.info("[CLI] Kontakt gelöscht: {}", id);
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich gelöscht.");
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 logger.warn("[CLI] Kontakt zum Löschen nicht gefunden: {}", id);
                 System.out.println("Kein Kontakt mit ID " + id + " gefunden.");
             }
