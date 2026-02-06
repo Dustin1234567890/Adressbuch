@@ -10,7 +10,7 @@ Ein digitales Adressbuch zur Verwaltung von Kontakten und Gruppen.
 2. Features:
    - Kontaktverwaltung
    - Gruppenverwaltung
-   - Import/Export der Kontaktliste (als .CSV)
+   - Import/Export der Kontaktliste (als .CSV) - Deprecated
 
 ## Technologie-Stack
 
