@@ -15,6 +15,7 @@ import de.adressbuch.models.Group;
 import de.adressbuch.service.ContactGroupService;
 import de.adressbuch.service.ContactService;
 import de.adressbuch.service.GroupService;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -56,15 +57,23 @@ public class AdressbuchCLI implements Callable<Integer> {
                 UpdateContactCommand.class,
                 DeleteContactCommand.class
             })
-    public static class ContactCommand implements Callable<Integer> {
+    public static class ContactCommand implements Runnable {
         @Override
-        public Integer call() {
-            System.out.println("Kontakt-Befehle: add, list, search, update, delete");
-            return 0;
+        public void run() {
+            CommandLine.usage(this, System.out);
         }
     }
 
-    @Command(name = "add", description = "Neuen Kontakt hinzufuegen")
+    @Command(
+        name = "add",
+        description = "Neuen Kontakt hinzufuegen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch contact add -n Max Mustermann",
+            "  adressbuch contact add -n Max -p 0123456",
+            "  adressbuch contact add -n Max -p 0123456 -e max@mail.de -a \"Musterstrasse 1\""
+        }
+    )
     public static class AddContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddContactCommand.class);
         private final ContactService contactService;
@@ -73,16 +82,29 @@ public class AdressbuchCLI implements Callable<Integer> {
             this.contactService = contactService;
         }
 
-        @Option(names = {"-n", "--name"}, description = "Kontaktname", required = true)
+        @Option(
+            names = {"-n", "--name"},
+            description = "Kontaktname (Pflichtfeld)",
+            required = true
+        )
         private String name;
 
-        @Option(names = {"-p", "--phone"}, description = "Telefonnummer")
+        @Option(
+            names = {"-p", "--phone"},
+            description = "Telefonnummer"
+        )
         private String phone = "";
 
-        @Option(names = {"-a", "--address"}, description = "Adresse")
+        @Option(
+            names = {"-a", "--address"},
+            description = "Adresse"
+        )
         private String address = "";
 
-        @Option(names = {"-e", "--email"}, description = "Email-Adresse")
+        @Option(
+            names = {"-e", "--email"},
+            description = "E-Mail-Adresse"
+        )
         private String email = "";
 
         @Override
@@ -99,7 +121,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "list", description = "Alle Kontakte anzeigen")
+    @Command(
+        name = "list",
+        description = "Alle Kontakte anzeigen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch contact list"
+        }
+    )
     public static class ListContactsCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(ListContactsCommand.class);
         @Override
@@ -135,7 +164,18 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "search", description = "Kontakte suchen")
+    @Command(
+        name = "search",
+        description = "Kontakte suchen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch contact search name Max",
+            "  adressbuch contact search phone 0123456",
+            "  adressbuch contact search email max@mail.de",
+            "  adressbuch contact search address \"Musterstrasse 1\"",
+            "  adressbuch contact search id <Kontakt-ID>"
+        }
+    )
     public static class SearchContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(SearchContactCommand.class);
         public enum ContactSearchField {
@@ -186,7 +226,16 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "update", description = "Kontakt aktualisieren")
+    @Command(
+        name = "update",
+        description = "Kontakt aktualisieren",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch contact update -id <Kontakt-ID> -n \"Neuer Name\"",
+            "  adressbuch contact update -id <Kontakt-ID> -p 0123456",
+            "  adressbuch contact update -id <Kontakt-ID> -a \"Neue Adresse\" -e neue@mail.de"
+        }
+    )
     public static class UpdateContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(UpdateContactCommand.class);
         @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
@@ -248,7 +297,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "delete", description = "Kontakt loeschen")
+    @Command(
+        name = "delete",
+        description = "Kontakt loeschen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch contact delete -id <Kontakt-ID>"
+        }
+    )
     public static class DeleteContactCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(DeleteContactCommand.class);
         @Option(names = {"-id", "--id"}, description = "Kontakt-ID", required = true)
@@ -287,7 +343,15 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "add", description = "Neue Gruppe hinzufuegen")
+    @Command(
+        name = "add",
+        description = "Neue Gruppe hinzufuegen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group add -n Freunde",
+            "  adressbuch group add -n Familie -d \"Verwandte und enge Freunde\""
+        }
+    )
     public static class AddGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddGroupCommand.class);
         @Option(names = {"-n", "--name"}, description = "Gruppenname", required = true)
@@ -309,7 +373,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "list", description = "Alle Gruppen anzeigen")
+    @Command(
+        name = "list",
+        description = "Alle Gruppen anzeigen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group list"
+        }
+    )
     public static class ListGroupsCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(ListGroupsCommand.class);
         @Override
@@ -340,7 +411,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "delete", description = "Gruppe loeschen")
+    @Command(
+        name = "delete",
+        description = "Gruppe loeschen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group delete -id <Gruppen-ID>"
+        }
+    )
     public static class DeleteGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(DeleteGroupCommand.class);
         @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
@@ -359,7 +437,15 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "update", description = "Gruppe aktualisieren")
+    @Command(
+        name = "update",
+        description = "Gruppe aktualisieren",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group update -id <Gruppen-ID> -n \"Neuer Name\"",
+            "  adressbuch group update -id <Gruppen-ID> -d \"Neue Beschreibung\""
+        }
+    )
     public static class UpdateGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(UpdateGroupCommand.class);
         @Option(names = {"-id", "--id"}, description = "Gruppen-ID", required = true)
@@ -401,7 +487,15 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "search", description = "Gruppe suchen")
+    @Command(
+        name = "search",
+        description = "Gruppe suchen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group search name Freunde",
+            "  adressbuch group search id <Gruppen-ID>"
+        }
+    )
     public static class SearchGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(SearchGroupCommand.class);
         public enum GroupSearchField {
@@ -441,7 +535,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "add-contact-to-group", description = "Kontakt zu Gruppe hinzufuegen")
+    @Command(
+        name = "add-contact-to-group",
+        description = "Kontakt zu Gruppe hinzufuegen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group add-contact-to-group -idGroup <Gruppen-ID> -idContact <Kontakt-ID>"
+        }
+    )
     public static class AddContactToGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(AddContactToGroupCommand.class);
         @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
@@ -480,7 +581,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "is-contact-in-group", description = "Prueft, ob ein Kontakt in einer Gruppe ist")
+    @Command(
+        name = "is-contact-in-group",
+        description = "Prueft, ob ein Kontakt in einer Gruppe ist",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group is-contact-in-group -idGroup <Gruppen-ID> -idContact <Kontakt-ID>"
+        }
+    )
     public static class IsContactInGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(IsContactInGroupCommand.class);
         @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
@@ -517,7 +625,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "show-contacts-in-group", description = "Findet alle Kontakte in einer Gruppe")
+    @Command(
+        name = "show-contacts-in-group",
+        description = "Findet alle Kontakte in einer Gruppe",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group show-contacts-in-group -idGroup <Gruppen-ID>"
+        }
+    )
     public static class ListContactsInGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(ListContactsInGroupCommand.class);
         @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
@@ -571,7 +686,14 @@ public class AdressbuchCLI implements Callable<Integer> {
         }
     }
 
-    @Command(name = "remove-contact-from-group", description = "Kontakt von einer Gruppe entfernen")
+    @Command(
+        name = "remove-contact-from-group",
+        description = "Kontakt von einer Gruppe entfernen",
+        footerHeading = "%nBeispiele:%n",
+        footer = {
+            "  adressbuch group remove-contact-from-group -idGroup <Gruppen-ID> -idContact <Kontakt-ID>"
+        }
+    )
     public static class RemoveContactFromGroupCommand implements Callable<Integer> {
         private static final Logger logger = LoggerFactory.getLogger(RemoveContactFromGroupCommand.class);
         @Option(names = {"-idGroup", "--idGroup"}, description = "Gruppen-ID", required = true)
