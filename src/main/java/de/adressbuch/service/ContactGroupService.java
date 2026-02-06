@@ -39,13 +39,4 @@ public class ContactGroupService {
         contactGroupRepository.removeContactFromGroup(contactId, groupId);
         logger.info("Kontakt {} von Gruppe {} entfernt", contactId, groupId);
     }
-
-    public boolean groupExists(String id) {
-        return groupService.findGroupById(id).isPresent();
-    }
-
-    public boolean contactExists(String id) {
-        return contactService.findContactById(id).isPresent();
-    }
-
 }
