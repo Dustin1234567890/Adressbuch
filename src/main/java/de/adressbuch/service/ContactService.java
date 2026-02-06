@@ -3,18 +3,23 @@ package de.adressbuch.service;
 import java.util.List;
 import java.util.Optional;
 
+import de.adressbuch.exception.ContactNotFoundException;
+import de.adressbuch.exception.ValidationException;
 import de.adressbuch.models.Contact;
 import de.adressbuch.repository.interfaces.ContactRepo;
 import de.adressbuch.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ContactService {
+    private static final Logger logger = LoggerFactory.getLogger(ContactService.class);
     private final ContactRepo contactRepository;
 
     public ContactService(ContactRepo contactRepository) {
         this.contactRepository = contactRepository;
     }
 
-    public Contact addContact(String name, String phoneNumber, String address, String email) {
+    public Contact addContact(String name, String phoneNumber, String address, String email) throws ValidationException {
         validateContactName(name);
         Contact contact = new Contact(
             Utils.generateId(),
@@ -23,14 +28,17 @@ public class ContactService {
             Utils.convertToOptionalNonBlank(address),
             Utils.convertToOptionalNonBlank(email)
         );
-        return contactRepository.save(contact);
+        
+        Contact savedContact = contactRepository.save(contact);
+        logger.info("Kontakt geaddet: {} ({})", savedContact.name(), savedContact.id());
+        return savedContact;
     }
 
-    public Contact updateContact(String id, String name, String phoneNumber, String address, String email) {
-        Optional<Contact> existing = findContactById(id);
-        if(existing.isEmpty()){
-            throw new IllegalArgumentException("Contact does not exist" + id);
-        }
+    public Contact updateContact(String id, String name, String phoneNumber, String address, String email) 
+            throws ContactNotFoundException, ValidationException {
+        
+        findContactById(id).orElseThrow(() -> new ContactNotFoundException(id));
+        
         validateContactName(name);
         
         Contact updated = new Contact(
@@ -40,15 +48,16 @@ public class ContactService {
             Utils.convertToOptionalNonBlank(address),
             Utils.convertToOptionalNonBlank(email)
         );
-        return contactRepository.update(updated);
+        
+        Contact updatedContact = contactRepository.update(updated);
+        logger.info("Kontakt geupdatet: {} ({})", name, id);
+        return updatedContact;
     }
 
-    public boolean deleteContact(String id) {
-        Optional<Contact> deleted = contactRepository.deleteById(id);
-        if (deleted.isEmpty()) {
-            throw new IllegalArgumentException("Contact not found with id: " + id);
-        }
-        return true;
+    public void deleteContact(String id) throws ContactNotFoundException {
+        contactRepository.deleteById(id).orElseThrow(() -> new ContactNotFoundException(id));
+        
+        logger.info("Kontakt gelöscht: {}", id);
     }
 
     public Optional<Contact> findContactById(String id) {
@@ -56,28 +65,39 @@ public class ContactService {
     }
 
     public List<Contact> findAllContacts() {
-        return contactRepository.findAll();
+        List<Contact> contacts = contactRepository.findAll();
+        logger.debug("{} Kontakte geladen", contacts.size());
+        return contacts;
     }
 
     public Optional<List<Contact>> findContactsByName(String searchTerm) {
-        return contactRepository.findByName(searchTerm);
+        Optional<List<Contact>> foundContacts = contactRepository.findByName(searchTerm);
+        logger.debug("Suche nach Name '{}': {} Kontakte gefunden", searchTerm, foundContacts.map(List::size).orElse(0));
+        return foundContacts;
     }
     
     public Optional<List<Contact>> findContactsByPhone(String searchTerm) {
-        return contactRepository.findByPhone(searchTerm);
+        Optional<List<Contact>> foundContacts = contactRepository.findByPhone(searchTerm);
+        logger.debug("Suche nach Telefon '{}': {} Kontakte gefunden", searchTerm, foundContacts.map(List::size).orElse(0));
+        return foundContacts;
     }
 
     public Optional<List<Contact>> findContactsByEmail(String searchTerm) {
-        return contactRepository.findByEmail(searchTerm);
+        Optional<List<Contact>> foundContacts = contactRepository.findByEmail(searchTerm);
+        logger.debug("Suche nach Email '{}': {} Kontakte gefunden", searchTerm, foundContacts.map(List::size).orElse(0));
+        return foundContacts;
     }
 
     public Optional<List<Contact>> findContactsByAddresse(String searchTerm) {
-        return contactRepository.findByAddresse(searchTerm);
+        Optional<List<Contact>> foundContacts = contactRepository.findByAddresse(searchTerm);
+        logger.debug("Suche nach Adresse '{}': {} Kontakte gefunden", searchTerm, foundContacts.map(List::size).orElse(0));
+        return foundContacts;
     }
 
-    public void validateContactName(String name) {
+    private void validateContactName(String name) throws ValidationException {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Contact name cannot be empty");
+            logger.warn("Kontakt-Namen Validierung fehlgeschlagen: name ist null oder empty");
+            throw new ValidationException("Kontakt Name darf nicht leer sein");
         }
     }
 }

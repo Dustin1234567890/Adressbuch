@@ -6,10 +6,7 @@ import org.slf4j.LoggerFactory;
 import de.adressbuch.cli.AdressbuchCLI;
 import de.adressbuch.cli.CliFactory;
 import de.adressbuch.cli.InteractiveTUI;
-import de.adressbuch.config.DatabaseConfig;
-import de.adressbuch.repository.SQLiteContactGroupRepo;
-import de.adressbuch.repository.SQLiteContactRepo;
-import de.adressbuch.repository.SQLiteGroupRepo;
+import de.adressbuch.injection.ServiceFactory;
 import de.adressbuch.service.ContactGroupService;
 import de.adressbuch.service.ContactService;
 import de.adressbuch.service.GroupService;
@@ -29,12 +26,11 @@ public class Main {
         } else {
             // CLI mode with picocli
             logger.info("Starting CLI mode");
+            ServiceFactory factory = ServiceFactory.getInstance();
             AdressbuchCLI cli = new AdressbuchCLI();
-            ContactService contactService = new ContactService(new SQLiteContactRepo(DatabaseConfig.DB_URL));
-
-            GroupService groupService = new GroupService(new SQLiteGroupRepo(DatabaseConfig.DB_URL));
-
-            ContactGroupService contactGroupService = new ContactGroupService(new SQLiteContactGroupRepo(DatabaseConfig.DB_URL), groupService, contactService);
+            ContactService contactService = factory.getContactService();
+            GroupService groupService = factory.getGroupService();
+            ContactGroupService contactGroupService = factory.getContactGroupService();
 
             CommandLine cmd;
             cmd = new CommandLine(

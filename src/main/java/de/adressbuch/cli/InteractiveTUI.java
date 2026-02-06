@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
-import de.adressbuch.config.DatabaseConfig;
+import de.adressbuch.injection.ServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import de.adressbuch.models.Contact;
 import de.adressbuch.models.Group;
-import de.adressbuch.repository.SQLiteContactGroupRepo;
-import de.adressbuch.repository.SQLiteContactRepo;
-import de.adressbuch.repository.SQLiteGroupRepo;
 import de.adressbuch.service.ContactGroupService;
 import de.adressbuch.service.ContactService;
 import de.adressbuch.service.GroupService;
 
 public class InteractiveTUI {
+    private static final Logger logger = LoggerFactory.getLogger(InteractiveTUI.class);
     private final ContactService contactService;
     private final GroupService groupService;
     private static ContactGroupService contactGroupService;
@@ -30,12 +30,14 @@ public class InteractiveTUI {
 
     public InteractiveTUI(Scanner scanner) {
         this.scanner = scanner;
-        this.contactService = new ContactService(new SQLiteContactRepo(DatabaseConfig.DB_URL));
-        this.groupService = new GroupService(new SQLiteGroupRepo(DatabaseConfig.DB_URL));
-        this.contactGroupService = new ContactGroupService(new SQLiteContactGroupRepo(DatabaseConfig.DB_URL), groupService, contactService);
+        ServiceFactory factory = ServiceFactory.getInstance();
+        this.contactService = factory.getContactService();
+        this.groupService = factory.getGroupService();
+        this.contactGroupService = factory.getContactGroupService();
     }
 
     public void start() {
+        logger.info("[TUI] Adressbuch gestartet");
         System.out.println("Willkommen im Adressbuch!\n" +
             "Bitte wählen Sie eine Option aus dem Hauptmenü, um fortzufahren.");
 
@@ -43,8 +45,10 @@ public class InteractiveTUI {
             displayMenu();
             System.out.print("> ");
             String choice = scanner.nextLine().trim();
+            logger.debug("[TUI] Hauptmenü-Auswahl: {}", choice);
             processChoice(choice);
         }
+        logger.info("[TUI] Adressbuch beendet");
     }
 
     private void displayMenu() {
@@ -100,6 +104,7 @@ public class InteractiveTUI {
 
     private void showContacts() {
         var contacts = contactService.findAllContacts();
+        logger.debug("[TUI] {} Kontakte gezeigt", contacts.size());
         if (contacts.isEmpty()) {
             System.out.println("Keine Kontakte vorhanden.");
             return;
@@ -128,6 +133,7 @@ public class InteractiveTUI {
         System.out.print("Name      : ");
         String name = scanner.nextLine();
         if (name.isEmpty()) {
+            logger.warn("[TUI] Kontakt-Name ist leer");
             System.out.println("Name darf nicht leer sein. Vorgang abgebrochen.");
             return;
         }
@@ -142,6 +148,7 @@ public class InteractiveTUI {
         String email = scanner.nextLine();
 
         contactService.addContact(name, phone, adresse, email);
+        logger.info("[TUI] Kontakt geaddet: {}", name);
 
         System.out.println("Kontakt hinzugefügt:");
         System.out.println("Name    : " + name);
@@ -158,6 +165,7 @@ public class InteractiveTUI {
 
         var existingContact = contactService.findContactById(id);
         if (existingContact.isEmpty()) {
+            logger.warn("[TUI] Kontakt zum Updaten nicht gefunden: {}", id);
             System.out.println("Kein Kontakt mit der ID " + id + " gefunden. Vorgang abgebrochen.");
             return;
         }
@@ -192,6 +200,7 @@ public class InteractiveTUI {
         }
 
         contactService.updateContact(id, name, phone, adresse, email);
+        logger.info("[TUI] Kontakt geupdatet: {}", id);
 
         System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
     }
@@ -210,11 +219,26 @@ public class InteractiveTUI {
         Optional<List<Contact>> results;
 
         switch (choice) {
-            case "1" -> results = contactService.findContactById(term).map(List::of);
-            case "2" -> results = contactService.findContactsByName(term);
-            case "3" -> results = contactService.findContactsByPhone(term);
-            case "4" -> results = contactService.findContactsByEmail(term);
-            case "5" -> results = contactService.findContactsByAddresse(term);
+            case "1" -> {
+                results = contactService.findContactById(term).map(List::of);
+                logger.debug("[TUI] Kontakt-Suche nach ID: {}", term);
+            }
+            case "2" -> {
+                results = contactService.findContactsByName(term);
+                logger.debug("[TUI] Kontakt-Suche nach Name: {}", term);
+            }
+            case "3" -> {
+                results = contactService.findContactsByPhone(term);
+                logger.debug("[TUI] Kontakt-Suche nach Telefon: {}", term);
+            }
+            case "4" -> {
+                results = contactService.findContactsByEmail(term);
+                logger.debug("[TUI] Kontakt-Suche nach Email: {}", term);
+            }
+            case "5" -> {
+                results = contactService.findContactsByAddresse(term);
+                logger.debug("[TUI] Kontakt-Suche nach Adresse: {}", term);
+            }
             default -> {
                 System.out.println("Ungültige Suchauswahl.");
                 return;
@@ -257,10 +281,12 @@ public class InteractiveTUI {
         response = scanner.nextLine().trim().toLowerCase();
 
         if ("ja".equals(response)) {
-            boolean deleted = contactService.deleteContact(id);
-            if (deleted) {
+            try {
+                contactService.deleteContact(id);
+                logger.info("[TUI] Kontakt gelöscht: {}", id);
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich gelöscht.");
-            } else {
+            } catch (IllegalArgumentException e) {
+                logger.warn("[TUI] Kontakt zum Löschen nicht gefunden: {}", id);
                 System.out.println("Keinen Kontakt mit ID " + id + " gefunden.");
             }
         } else {
@@ -312,6 +338,7 @@ public class InteractiveTUI {
 
     private void showGroups() {
         var groups = groupService.findAllGroups();
+        logger.debug("[TUI] {} Gruppen gezeigt", groups.size());
         if (groups.isEmpty()) {
             System.out.println("Keine Gruppen vorhanden");
             return;
@@ -336,6 +363,7 @@ public class InteractiveTUI {
         System.out.print("Gruppenname   : ");
         String name = scanner.nextLine();
         if (name.isEmpty()) {
+            logger.warn("[TUI] Gruppen-Name ist leer");
             System.out.println("Name darf nicht leer sein. Vorgang abgebrochen.");
             return;
         }
@@ -344,6 +372,7 @@ public class InteractiveTUI {
         String desc = scanner.nextLine();
 
         groupService.addGroup(name, desc);
+        logger.info("[TUI] Gruppe geaddet: {}", name);
 
         System.out.println();
         System.out.println("Gruppe erfolgreich angelegt");
@@ -365,8 +394,14 @@ public class InteractiveTUI {
         Optional<List<Group>> results;
 
         switch (choice) {
-            case "1" -> results = groupService.findGroupById(term).map(List::of);
-            case "2" -> results = groupService.findGroupByName(term);
+            case "1" -> {
+                results = groupService.findGroupById(term).map(List::of);
+                logger.debug("[TUI] Gruppen-Suche nach ID: {}", term);
+            }
+            case "2" -> {
+                results = groupService.findGroupByName(term);
+                logger.debug("[TUI] Gruppen-Suche nach Name: {}", term);
+            }
             default -> {
                 System.out.println("Ungültige Suchauswahl.");
                 return;
@@ -408,12 +443,14 @@ public class InteractiveTUI {
         response = scanner.nextLine().trim().toLowerCase();
 
         if ("ja".equals(response)) {
-            boolean deleted = groupService.deleteGroup(id);
-            if (deleted) {
+            try {
+                groupService.deleteGroup(id);
+                logger.info("[TUI] Gruppe gelöscht: {}", id);
                 System.out.println("Gruppe mit ID " + id + " wurde erfolgreich gelöscht.");
-            } else {
+            } catch (IllegalArgumentException e) {
+                logger.warn("[TUI] Gruppe zum Löschen nicht gefunden: {}", id);
                 System.out.println("Keine Gruppe mit ID " + id + " gefunden.");
-            } 
+            }
         }else {
             System.out.println("Der Löschvorgang wurde abgebrochen.");
         }
@@ -428,6 +465,7 @@ public class InteractiveTUI {
 
         Optional<Group> existingGroup = groupService.findGroupById(id);
         if (existingGroup.isEmpty()) {
+            logger.warn("[TUI] Gruppe zum Updaten nicht gefunden: {}", id);
             System.out.println("Keine Gruppe mit der ID " + id + " gefunden.");
             return;
         }
@@ -449,6 +487,7 @@ public class InteractiveTUI {
         }
 
         groupService.updateGroup(id, newName, newDesc);
+        logger.info("[TUI] Gruppe geupdatet: {}", id);
         
         System.out.println("Gruppe erfolgreich aktualisiert.");
         System.out.println("Neue Daten:");
@@ -461,6 +500,7 @@ public class InteractiveTUI {
         String groupId = scanner.nextLine().trim();
         Optional<Group> existingGroup = groupService.findGroupById(groupId);
         if (existingGroup.isEmpty()) {
+            logger.warn("[TUI] Gruppe nicht gefunden beim Hinzufügen: {}", groupId);
             System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
             return;
         }
@@ -469,16 +509,19 @@ public class InteractiveTUI {
         String contactId = scanner.nextLine().trim();
         Optional<Contact> existingContact = contactService.findContactById(contactId);
         if (existingContact.isEmpty()) {
+            logger.warn("[TUI] Kontakt nicht gefunden beim Hinzufügen: {}", contactId);
             System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
             return;
         }
 
         if (contactGroupService.isContactInGroup(contactId, groupId)) {
+            logger.debug("[TUI] Kontakt ist bereits in Gruppe: {}/{}", contactId, groupId);
             System.out.println("Kontakt ist bereits in der Gruppe.");
             return;
         }
 
         contactGroupService.addContactToGroup(contactId, groupId);
+        logger.info("[TUI] Kontakt zu Gruppe geaddet: {}/{}", contactId, groupId);
         System.out.println("Kontakt wurde zur Gruppe hinzugefügt.");
     }
 
@@ -487,11 +530,13 @@ public class InteractiveTUI {
         String groupId = scanner.nextLine().trim();
         Optional<Group> existingGroup = groupService.findGroupById(groupId);
         if (existingGroup.isEmpty()) {
+            logger.warn("[TUI] Gruppe nicht gefunden beim Anzeigen: {}", groupId);
             System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
             return;
         }
 
         List<String> contactIds = contactGroupService.findContactIdsByGroupId(groupId);
+        logger.debug("[TUI] {} Kontakte in Gruppe {} gezeigt", contactIds.size(), groupId);
         if (contactIds.isEmpty()) {
             System.out.println("Keine Kontakte in der Gruppe gefunden.");
             return;
@@ -532,6 +577,7 @@ public class InteractiveTUI {
 
         Optional<Group> existingGroup = groupService.findGroupById(groupId);
         if (existingGroup.isEmpty()) {
+            logger.debug("[TUI] Gruppe nicht gefunden beim Überprüfen: {}", groupId);
             System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
             return;
         }
@@ -541,13 +587,16 @@ public class InteractiveTUI {
 
         Optional<Contact> existingContact = contactService.findContactById(contactId);
         if (existingContact.isEmpty()) {
+            logger.debug("[TUI] Kontakt nicht gefunden beim Überprüfen: {}", contactId);
             System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
             return;
         }
         
         if (contactGroupService.isContactInGroup(contactId, groupId)) {
+            logger.debug("[TUI] Kontakt ist in Gruppe: {}/{}", contactId, groupId);
             System.out.println("Der Kontakt " + existingContact.get().name() + " ist in der angegebenen Gruppe.");
         } else {
+            logger.debug("[TUI] Kontakt ist nicht in Gruppe: {}/{}", contactId, groupId);
             System.out.println("Der Kontakt ist nicht in der Gruppe.");
         }
     }
@@ -558,6 +607,7 @@ public class InteractiveTUI {
 
         Optional<Group> existingGroup = groupService.findGroupById(groupId);
         if (existingGroup.isEmpty()) {
+            logger.debug("[TUI] Gruppe nicht gefunden beim Entfernen: {}", groupId);
             System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
             return;
         }
@@ -567,14 +617,17 @@ public class InteractiveTUI {
 
         Optional<Contact> existingContact = contactService.findContactById(contactId);
         if (existingContact.isEmpty()) {
+            logger.debug("[TUI] Kontakt nicht gefunden beim Entfernen: {}", contactId);
             System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
             return;
         }
 
         if (contactGroupService.isContactInGroup(contactId, groupId)) {
             contactGroupService.removeContactFromGroup(contactId, groupId);
+            logger.info("[TUI] Kontakt entfernt aus Gruppe: {}/{}", contactId, groupId);
             System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
         } else {
+            logger.debug("[TUI] Kontakt war nicht in Gruppe: {}/{}", contactId, groupId);
             System.out.println("Der Kontakt war nicht in der Gruppe oder es gab ein Problem beim Entfernen.");
         }   
     }

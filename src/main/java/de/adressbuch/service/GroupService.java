@@ -6,8 +6,11 @@ import java.util.Optional;
 import de.adressbuch.models.Group;
 import de.adressbuch.repository.interfaces.GroupRepo;
 import de.adressbuch.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroupService {
+    private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
     private final GroupRepo groupRepository;
 
     public GroupService(GroupRepo groupRepository) {
@@ -21,7 +24,9 @@ public class GroupService {
             name, 
             Utils.convertToOptionalNonBlank(description)
         );
-        return groupRepository.save(group);
+        Group savedGroup = groupRepository.save(group);
+        logger.info("Gruppe geaddet: {} ({})", savedGroup.name(), savedGroup.id());
+        return savedGroup;
     }
 
     public Group updateGroup(String id, String name, String description) {
@@ -33,31 +38,42 @@ public class GroupService {
             name,
             Utils.convertToOptionalNonBlank(description)
         );
-        return groupRepository.update(updated);
+        Group updatedGroup = groupRepository.update(updated);
+        logger.info("Gruppe geupdet: {} ({})", name, id);
+        return updatedGroup;
     }
 
-    public boolean deleteGroup(String id) {
+    public void deleteGroup(String id) {
         Optional<Group> deleted = groupRepository.deleteById(id);
         if (deleted.isEmpty()) {
             throw new IllegalArgumentException("Group not found with id: " + id);
         }
-        return true;
+        logger.info("Gruppe gelöscht: {}", id);
     }
 
     public Optional<Group> findGroupById(String id) {
-        return groupRepository.findById(id);
+        Optional<Group> foundGroup = groupRepository.findById(id);
+        if (foundGroup.isEmpty()) {
+            logger.debug("Gruppe nicht gefunden: {}", id);
+        }
+        return foundGroup;
     }
 
     public Optional<List<Group>> findGroupByName(String name) {
-        return groupRepository.findByName(name);
+        Optional<List<Group>> foundGroups = groupRepository.findByName(name);
+        logger.debug("Suche nach Gruppe '{}': {} Gruppen gefunden", name, foundGroups.map(List::size).orElse(0));
+        return foundGroups;
     }
 
     public List<Group> findAllGroups() {
-        return groupRepository.findAll();
+        List<Group> foundGroups = groupRepository.findAll();
+        logger.debug("{} Gruppen geladen", foundGroups.size());
+        return foundGroups;
     }
 
     public void validateGroupName(String name) {
         if (name == null || name.isBlank()) {
+            logger.warn("Gruppen-Namen Validierung fehlgeschlagen: name ist null oder empty");
             throw new IllegalArgumentException("Group name cannot be empty");
         }
     }
