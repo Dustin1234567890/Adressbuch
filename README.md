@@ -1,27 +1,37 @@
 # Adressbuch
 
-Ein digitales Adressbuch zur Verwaltung von Kontakten.
-
-Was es können soll:
+Ein digitales Adressbuch zur Verwaltung von Kontakten und Gruppen.
 
 1. Entitäten:
    - Contact (Name, Telefonnummer,Adresse, E-Mail)
-   - Group (Gruppen, z. B. Familie, Arbeit)
-   - User (Nutzer des Adressbuchs)
+   - Group (Name, Beschreibung)
 2. Features:
-   - Kontakte hinzufügen, bearbeiten und löschen
-   - Kontakte nach Gruppen filtern
-   - Import/Export der Kontaktliste (z. B. als CSV)
+   - Kontaktverwaltung
+   - Gruppenverwaltung
+   - Import/Export der Kontaktliste (als .CSV)
 
-# Requirements:
-Java Version 21+
-Maven Latest Version
+## Technologie-Stack
 
-# Initial Setup:
+### Kern
+- **Java 21** - language
+- **Maven 3.9+** - Build & Dependency Management
+- **SQLite** - Datenbank
+
+### Frameworks & Libraries
+- **PicoCLI** - CLI-Framework
+- **jOOQ** - SQL Builder
+- **SLF4J + Logback** - Logging
+- **JUnit 5 (Jupiter)** - Testing
+- **Mockito 5.x** - Mocking für Unittests
+
+# Initial Setup und wichtige Befehle:
+```bash
 mvn clean install - Installiere alle dependencies für unser Projekt
 
-# Fresh resetup:
 mvn clean compile - vor dem install nochmal um neu zu kompilieren und alte Artifakte zu löschen
+
+#jar bauen
+mvn clean package
 
 # Testing
 mvn clean test - starte die Tests nach einem Cleanup
@@ -30,3 +40,4 @@ mvn surefire-report:report - Surefire report + Testing
 
 # Execute Program/Project (via Exec)
 mvn exec:java
+```
