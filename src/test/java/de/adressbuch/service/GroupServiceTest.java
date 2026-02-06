@@ -26,6 +26,12 @@ public class GroupServiceTest {
     public void testCreateGroup() {
         String name = "Test Group";
         Optional<String> description = Optional.of("Group for testing");
+        Group group = new Group(
+            Utils.generateId(), 
+            name, 
+            description
+        );
+        when(groupRepository.save(any(Group.class))).thenReturn(group);
 
         groupService.addGroup(name, description.orElse(null));
 
@@ -35,12 +41,14 @@ public class GroupServiceTest {
     @Test
     public void testGetGroupById() {
         String id = Utils.generateId();
-        Group group = new Group(id, "Test Group", Optional.of("Group for testing"));
+        Group group = new Group(
+            id, 
+            "Test Group", 
+            Optional.of("Group for testing")
+        );
         when(groupRepository.findById(id)).thenReturn(Optional.of(group));
 
-        Optional<Group> result = groupService.findGroupById(id);
-
-        assertEquals("Test Group", result.get().name());
+        assertEquals("Test Group", groupService.findGroupById(id).get().name());
         verify(groupRepository, times(1)).findById(id);
     }
 
@@ -48,13 +56,21 @@ public class GroupServiceTest {
     public void testGetGroupByIdNotFound() {
         when(groupRepository.findById(Utils.generateId())).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> groupService.findGroupById(Utils.generateId()).orElseThrow(() -> new IllegalArgumentException("Not found")));
+        assertThrows(
+            IllegalArgumentException.class, 
+            () -> groupService.findGroupById(Utils.generateId())
+                .orElseThrow(() -> new IllegalArgumentException("Not found"))
+        );
     }
 
     @Test
     public void testDeleteGroup() {
         String id = Utils.generateId();
-        Group group = new Group(id, "Test Group", Optional.empty());
+        Group group = new Group(
+            id, 
+            "Test Group", 
+            Optional.empty()
+        );
         when(groupRepository.deleteById(id)).thenReturn(Optional.of(group));
 
         groupService.deleteGroup(id);
