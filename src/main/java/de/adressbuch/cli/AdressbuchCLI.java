@@ -118,7 +118,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Kontakt " + name + " wurde erfolgreich angelegt.");
             } catch (Exception e) {
                 logger.error("[CLI] Fehler beim Hinzufuegen des Kontakts: {}", e.getMessage());
-                System.out.println("Fehler: " + e.getMessage());
+                System.err.println("Fehler: " + e.getMessage());
             }
             return 0;
         }
@@ -206,7 +206,7 @@ public class AdressbuchCLI implements Callable<Integer> {
             };
             logger.debug("[CLI] Kontakt-Suche nach {}: {}", field, search);
             if (results.isEmpty()) {
-                System.out.println("Kein Kontakt mit dem Suchbegriff " + search + " gefunden.");
+                System.err.println("Kein Kontakt mit dem Suchbegriff " + search + " gefunden.");
                 return 0;
             }
             System.out.printf(
@@ -266,7 +266,7 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             if (existingContact.isEmpty()) {
                 logger.warn("[CLI] Kontakt zum Updaten nicht gefunden: {}", id);
-                System.out.println("Kein Kontakt mit der ID " + id + " gefunden. Aktualisierung abgebrochen.");
+                System.err.println("Kein Kontakt mit der ID " + id + " gefunden. Aktualisierung abgebrochen.");
                 return 0;
             }
 
@@ -284,7 +284,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich aktualisiert.");
             } catch (Exception e) {
                 logger.error("[CLI] Fehler beim Aktualisieren des Kontakts: {}", e.getMessage());
-                System.out.println("Fehler: " + e.getMessage());
+                System.err.println("Fehler: " + e.getMessage());
             }
 
             System.out.println("Kontakt erfolgreich aktualisiert:");
@@ -328,7 +328,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Kontakt mit ID " + id + " wurde erfolgreich geloescht.");
             } catch (Exception e) {
                 logger.warn("[CLI] Kontakt zum Loeschen nicht gefunden: {}", id);
-                System.out.println("Kein Kontakt mit ID " + id + " gefunden.");
+                System.err.println("Kein Kontakt mit ID " + id + " gefunden.");
             }
             return 0;
         }
@@ -450,7 +450,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Gruppe mit ID " + id + " wurde erfolgreich geloescht.");
             } catch (IllegalArgumentException e) {
                 logger.warn("[CLI] Gruppe zum Loeschen nicht gefunden: {}", id);
-                System.out.println("Keine Gruppe mit ID " + id + " gefunden.");
+                System.err.println("Keine Gruppe mit ID " + id + " gefunden.");
             }
             return 0;
         }
@@ -486,7 +486,7 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             if (existingContact.isEmpty()) {
                 logger.warn("[CLI] Gruppe zum Updaten nicht gefunden: {}", id);
-                System.out.println("Keine Gruppe mit der ID " + id + " gefunden. Aktualisierung abgebrochen.");
+                System.err.println("Keine Gruppe mit der ID " + id + " gefunden. Aktualisierung abgebrochen.");
                 return 0;
             }
 
@@ -540,7 +540,7 @@ public class AdressbuchCLI implements Callable<Integer> {
             };
             logger.debug("[CLI] Gruppen-Suche nach {}: {}", field, search);
             if (results.isEmpty()) {
-                System.out.println("Keine Gruppe mit dem Suchbegriff " + search + " gefunden.");
+                System.err.println("Keine Gruppe mit dem Suchbegriff " + search + " gefunden.");
                 return 0;
             }
             System.out.printf(DisplayConstants.GROUP_HEADER_FORMAT, "ID", "Name", "Beschreibung");
@@ -589,19 +589,19 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             if (existingGroup.isEmpty()) {
                 logger.warn("[CLI] Gruppe nicht gefunden beim Hinzufuegen: {}", groupId);
-                System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                System.err.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
                 return 0;
             }
 
             if (existingContact.isEmpty()) {
                 logger.warn("[CLI] Kontakt nicht gefunden beim Hinzufuegen: {}", contactId);
-                System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+                System.err.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
                 return 0;
             }
             
             if (contactGroupService.isContactInGroup(contactId, groupId)) {
                 logger.debug("[CLI] Kontakt ist bereits in Gruppe: {}/{}", contactId, groupId);
-                System.out.println("Kontakt ist bereits in der Gruppe.");
+                System.err.println("Kontakt ist bereits in der Gruppe.");
                 return 0;
             }
             
@@ -611,7 +611,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Kontakt erfolgreich zur Gruppe hinzugefuegt.");
             } catch (ContactNotFoundException | GroupNotFoundException e) {
                 logger.warn("[CLI] Fehler beim Hinzufuegen: {}", e.getMessage());
-                System.out.println("Fehler: " + e.getMessage());
+                System.err.println("Fehler: " + e.getMessage());
             }
             return 0;
         }
@@ -648,12 +648,12 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             if (existingGroup.isEmpty()) {
                 logger.debug("[CLI] Gruppe nicht gefunden: {}", groupId);
-                System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                System.err.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
                 return 0;
             }
             if (existingContact.isEmpty()) {
                 logger.debug("[CLI] Kontakt nicht gefunden: {}", contactId);
-                System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+                System.err.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
                 return 0;
             }
             
@@ -662,7 +662,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Der Kontakt " + existingContact.get().name() + " ist in der angegebenen Gruppe.");
             } else {
                 logger.debug("[CLI] Kontakt ist nicht in Gruppe: {}/{}", contactId, groupId);
-                System.out.println("Der Kontakt ist nicht in der Gruppe.\n" +
+                System.err.println("Der Kontakt ist nicht in der Gruppe.\n" +
                 "Um einen Kontakt zu einer Gruppe hinzuzufuegen, verwenden Sie den Befehl 'add-contact-to-group'.");
             }
             return 0;
@@ -691,14 +691,14 @@ public class AdressbuchCLI implements Callable<Integer> {
             List<String> contactIds = contactGroupService.findContactIdsByGroupId(groupId);
             logger.debug("[CLI] {} Kontakte in Gruppe gefunden: {}", contactIds.size(), groupId);
             if (contactIds.isEmpty()) {
-                System.out.println("Keine Kontakte in der Gruppe gefunden.");
+                System.err.println("Keine Kontakte in der Gruppe gefunden.");
                 return 0;
             } else {
                 Optional<Group> existingGroup = groupService.findGroupById(groupId);
 
                 if (existingGroup.isEmpty()) {
                     logger.warn("[CLI] Gruppe nicht gefunden: {}", groupId);
-                    System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                    System.err.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
                     return 0;
                 }
 
@@ -710,7 +710,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 }
 
                 if (results.isEmpty()) {
-                    System.out.println("Keine gueltigen Kontakte gefunden.");
+                    System.err.println("Keine gueltigen Kontakte gefunden.");
                     return 0;
                 }
                 System.out.printf(
@@ -765,12 +765,12 @@ public class AdressbuchCLI implements Callable<Integer> {
 
             if (existingGroup.isEmpty()) {
                 logger.debug("[CLI] Gruppe nicht gefunden beim Entfernen: {}", groupId);
-                System.out.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
+                System.err.println("Keine Gruppe mit der ID " + groupId + " gefunden.");
                 return 0;
             }
             if (existingContact.isEmpty()) {
                 logger.debug("[CLI] Kontakt nicht gefunden beim Entfernen: {}", contactId);
-                System.out.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
+                System.err.println("Kein Kontakt mit der ID " + contactId + " gefunden.");
                 return 0;
             }
             try {
@@ -779,7 +779,7 @@ public class AdressbuchCLI implements Callable<Integer> {
                 System.out.println("Kontakt mit ID " + contactId + " wurde aus der Gruppe mit ID " + groupId + " entfernt.");
             } catch (ValidationException e) {
                 logger.warn("[CLI] Fehler beim Entfernen: {}", e.getMessage());
-                System.out.println("Fehler: " + e.getMessage());
+                System.err.println("Fehler: " + e.getMessage());
             }
             return 0;
         }
